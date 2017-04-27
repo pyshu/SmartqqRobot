@@ -9,8 +9,7 @@ import json
 from multiprocessing import Process
 
 class SmartQQRobot():
-    def __init__(self,qq_number):
-        self._qq_number = qq_number
+    def __init__(self):
         # self._headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.73 Safari/537.36'}
         self._headers = {'User-Agent': "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.75 Safari/537.36 LBBROWSER",
                          'Referer' : 'https://ui.ptlogin2.qq.com/cgi-bin/login?daid=164&target=self&style=16&mibao_css=m_webqq&appid=501004106&enable_qlogin=0&no_verifyimg=1&s_url=http%3A%2F%2Fw.qq.com%2Fproxy.html&f_url=loginerroralert&strong_login=1&login_state=10&t=20131024001'}
@@ -47,7 +46,6 @@ class SmartQQRobot():
         token = 0
         for i in range(len(self._cookies_qrsig)):
             token += (token << 5) + ord(self._cookies_qrsig[i])
-        print(2147483647 & token)
         return 2147483647 & token
 
     def _check_login_status(self,p):
@@ -58,7 +56,6 @@ class SmartQQRobot():
               "&ptredirect=0&ptlang=2052&daid=164&from_ui=1&pttype=1&dumy=&fp=loginerroralert" \
               "&action=0-0-" + str(random.randint(1000, 30000)) +\
               "&mibao_css=m_webqq&t=1&g=1&js_type=0&js_ver=10216&login_sig=&pt_randsalt=2"
-        print(url)
         # 死循环检测扫码登陆状态
         while 1:
             content = self._session.get(url=url).content.decode("utf-8")
@@ -71,8 +68,7 @@ class SmartQQRobot():
                     p.terminate()
                 self._login_status = True
                 return data[2].replace("'","")
-            print("二维码认证中...")
-            # print(content)
+            print("二维码认证中.....（请用手机QQ扫描二维码并确认登陆.）")
             time.sleep(3)
 
     def _login(self):
@@ -110,10 +106,7 @@ class SmartQQRobot():
         self._headers["Origin"] = "http://d1.web2.qq.com"
         self._session.headers.update(self._headers)
         url = "http://d1.web2.qq.com/channel/login2"
-        p_data = {"ptwebqq": str(self._ptwebqq),
-                    "clientid":53999199,
-                    "psessionid":"",
-                    "status":"online"}
+        p_data = {"ptwebqq": str(self._ptwebqq),"clientid":53999199,"psessionid":"","status":"online"}
         r_data = {"r":json.dumps(p_data)}
 
         j_data = json.loads(self._session.post(url=url,data=r_data).content.decode("utf-8"))
@@ -168,6 +161,7 @@ class SmartQQRobot():
         j_data = json.loads(self._session.post(url=url, data=r_data).content.decode("utf-8"))
         print("QQ好友信息：")
         print(j_data)
+        return j_data
 
     def _get_chat_msg(self):
         get_msg_url = "https://d1.web2.qq.com/channel/poll2"
@@ -181,6 +175,28 @@ class SmartQQRobot():
         r_data = {"r": json.dumps(p_data)}
         j_data = json.loads(self._session.post(url=get_msg_url, data=r_data).content.decode("utf-8"))
         print(j_data)
+        if j_data.keys("errmsg"):
+            return "None"
+        if j_data.keys("result"):# and  j_data["result"]["poll_type"] == "group_message":
+            return {"poll_type":j_data["result"]["poll_type"],
+                     "from_uin":j_data["result"]["value"]["from_uin"],
+                     "content":j_data["result"]["value"]["content"][1:]
+                    }
+        return j_data
+        '''{"errmsg":"error!!!","retcode":0}'''
+        '''{"result":[{"poll_type":"group_message",
+                      "value":{"content":[["font",{"color":"000000","name":"微软雅黑","size":10,"style":[0,0,0]}],"4"],
+                               "from_uin":1031415212,
+                                "group_code":1031415212,"msg_id":56791,"msg_type":0,"send_uin":2327452558,"time":1493302500,"to_uin":979885605}}],"retcode":0}
+        '''
+        '''{"result":[{"poll_type":"message",
+                      "value":{"content":[["font",{"color":"000000","name":"微软雅黑","size":10,"style":[0,0,0]}],"哈哈"],
+                      "from_uin":2327452558,
+                      "msg_id":56807,"msg_type":0,"time":1493304815,"to_uin":979885605}}],"retcode":0}'''
+        '''{"result":[{"poll_type":"group_message",
+                        "value":{"content":[["font",{"color":"000000","name":"微软雅黑","size":10,"style":[0,0,0]}],"哼哼","@时光1号",""," "],
+                        "from_uin":1031415212,
+                        "group_code":1031415212,"msg_id":56815,"msg_type":0,"send_uin":2327452558,"time":1493305091,"to_uin":979885605}}],"retcode":0}'''
 
     def _get_self_info(self):
         url = "http://s.web2.qq.com/api/get_self_info2?t=1493263376886"
@@ -188,6 +204,7 @@ class SmartQQRobot():
         self._face = j_data["result"]["face"]
         print("我的QQ资料：")
         print(j_data)
+        return j_data
 
     def _send_qun_msg(self,group_uin,msg):
         url = "https://d1.web2.qq.com/channel/send_qun_msg2"
@@ -221,5 +238,5 @@ class SmartQQRobot():
         self.msg_robot()
 
 if __name__=="__main__":
-    qq = SmartQQRobot(1)
+    qq = SmartQQRobot()
     qq.run()

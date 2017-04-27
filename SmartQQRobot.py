@@ -5,9 +5,8 @@ import tkinter
 import requests
 import random
 import time
-# import re
-from multiprocessing import Process
 import json
+from multiprocessing import Process
 
 class SmartQQRobot():
     def __init__(self,qq_number):
@@ -24,8 +23,9 @@ class SmartQQRobot():
         self._psessionid = ""
         self._uin = ""
         self._clientid = 53999199
+        self._face = 0
 
-        self._login_status = False
+        # self._login_status = False
 
     def _show_QRC(self,content):
         # 通过 tkinter 显示二维码.
@@ -85,6 +85,7 @@ class SmartQQRobot():
         #启动进程 p
         p.start()
         time.sleep(1)
+
         #获取验证成功后返回的请求地址
         url = self._check_login_status(p)
         self._headers.pop("Referer")
@@ -93,6 +94,7 @@ class SmartQQRobot():
         # 请求获取 cookies 中 ptwebqq
         self._session.get(url=url)
         self._ptwebqq = (requests.utils.dict_from_cookiejar(self._session.cookies))["ptwebqq"]
+        # self._ptwebqq = json.loads(self._session.get(url=url).content.decode("utf-8"))["result"]["vfwebqq"]
         print("ptwebqq : %s" % self._ptwebqq)
 
         # 请求获取 json 中 vfwebqq
@@ -121,21 +123,98 @@ class SmartQQRobot():
         print("uin : %s" % self._uin)
         print("恭喜，SmartQQ登录成功。")
 
-    def msg_robot(self):
-        get_msg_url = "http://d1.web2.qq.com/channel/poll2"
-        # self._headers.pop("Origin")
-        self._session.headers.update(self._headers)
-        p_data = {"ptwebqq": str(self._ptwebqq),
-                 "clientid": 53999199,
-                 "psessionid": str(self._psessionid),
-                 "key": ""
-                 }
+    def _get_hash(self):
+        uin = int(self._uin)
+        ptwebqq = self._ptwebqq
+        # hah = "0A4C0362501C02FE"
+        ptb = [0,0,0,0]
+        for i in range(len(ptwebqq)):
+            ptb[i % 4] ^= ord(ptwebqq[i])
+        # salt = ["EC", "OK"]
+        uin = int(uin)
+        uinByte = [0,0,0,0]
+        uinByte[0] = uin >> 24 & 255 ^ 69
+        uinByte[1] = uin >> 16 & 255 ^ 67
+        uinByte[2] = uin >> 8 & 255 ^ 79
+        uinByte[3] = uin & 255 ^ 75
+        result = [0 for x in range(8)]
+        for i in range(0,8):
+            if(i % 2 == 0):
+                result[i] = ptb[i >> 1]
+            else:
+                result[i] = uinByte[i >> 1]
+        hex = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F']
+        buf = ""
+        for i in result:
+            buf += hex[i >> 4 & 15]
+            buf += hex[i & 15]
+        return buf
+
+    def _get_group_info(self):
+        url = "http://s.web2.qq.com/api/get_group_name_list_mask2"
+        p_data = {"vfwebqq": str(self._vfwebqq), "hash": self._get_hash()}
         r_data = {"r": json.dumps(p_data)}
-        while 1:
-            j_data = json.loads(self._session.post(url=get_msg_url,data=r_data).content.decode("utf-8"))
-            print(j_data)
-            time.sleep(3)
-            # print(self._session.cookies)
+        j_data = json.loads(self._session.post(url=url, data=r_data).content.decode("utf-8"))
+        print("QQ群：")
+        # for group in j_data["result"]["gnamelist"]:
+        #     print(group["name"])
+        print(j_data["result"]["gnamelist"])
+        return j_data["result"]["gnamelist"]
+
+    def _get_friends_info(self):
+        url = "http://s.web2.qq.com/api/get_user_friends2"
+        p_data = {"vfwebqq": str(self._vfwebqq),"hash": self._get_hash()}
+        r_data = {"r": json.dumps(p_data)}
+        j_data = json.loads(self._session.post(url=url, data=r_data).content.decode("utf-8"))
+        print("QQ好友信息：")
+        print(j_data)
+
+    def _get_chat_msg(self):
+        get_msg_url = "https://d1.web2.qq.com/channel/poll2"
+        # self._headers["Origin"] = "http://d1.web2.qq.com"
+        # self._headers["Referer"] = "http://s.web2.qq.com/proxy.html?v=20130916001&callback=1&id=1"
+        # self._session.headers.update(self._headers)
+        p_data = {"ptwebqq": str(self._ptwebqq),
+                  "clientid": 53999199,
+                  "psessionid": str(self._psessionid),
+                  "key": ""}
+        r_data = {"r": json.dumps(p_data)}
+        j_data = json.loads(self._session.post(url=get_msg_url, data=r_data).content.decode("utf-8"))
+        print(j_data)
+
+    def _get_self_info(self):
+        url = "http://s.web2.qq.com/api/get_self_info2?t=1493263376886"
+        j_data = json.loads(self._session.get(url=url).content.decode("utf-8"))
+        self._face = j_data["result"]["face"]
+        print("我的QQ资料：")
+        print(j_data)
+
+    def _send_qun_msg(self,group_uin,msg):
+        url = "https://d1.web2.qq.com/channel/send_qun_msg2"
+        p_data = {"group_uin":group_uin,
+                "content":'[\"' + str(msg) + '\",[\"font\",{\"name\":\"宋体\",\"size\":10,\"style\":[0,0,0],\"color\":\"000000\"}]]',
+                "face":self._face,
+                "clientid":53999199,
+                "msg_id":1530000 + random.randint(1000,10000),
+                "psessionid":str(self._psessionid)}
+        r_data = {"r": json.dumps(p_data)}
+        j_data = json.loads(self._session.post(url=url, data=r_data).content.decode("utf-8"))
+        print("群消息发送状态：%s" % j_data)
+
+    def msg_robot(self):
+        self._get_self_info()
+        self._get_friends_info()
+
+        for group in self._get_group_info():
+            if group['name'] == "时光 年华":
+                group_uin = group['gid']
+                msg = "你们好啊，我是机器人！"
+                self._send_qun_msg(group_uin,msg)
+                time.sleep(10)
+        # while 1:
+            # self._get_chat_msg()
+            # self._send_qun_msg(group_uin)
+            # time.sleep(3)
 
     def run(self):
         self._login()

@@ -144,17 +144,17 @@ class SmartQQRobot():
         return buf
 
     def _get_group_info(self):
+        # 获取QQ群信息
         url = "http://s.web2.qq.com/api/get_group_name_list_mask2"
         p_data = {"vfwebqq": str(self._vfwebqq), "hash": self._get_hash()}
         r_data = {"r": json.dumps(p_data)}
         j_data = json.loads(self._session.post(url=url, data=r_data).content.decode("utf-8"))
         print("QQ群：")
-        # for group in j_data["result"]["gnamelist"]:
-        #     print(group["name"])
         print(j_data["result"]["gnamelist"])
         return j_data["result"]["gnamelist"]
 
     def _get_friends_info(self):
+        # 获取QQ好友信息
         url = "http://s.web2.qq.com/api/get_user_friends2"
         p_data = {"vfwebqq": str(self._vfwebqq),"hash": self._get_hash()}
         r_data = {"r": json.dumps(p_data)}
@@ -164,10 +164,11 @@ class SmartQQRobot():
         return j_data
 
     def _get_chat_msg(self):
+        # 接收消息
         get_msg_url = "https://d1.web2.qq.com/channel/poll2"
-        # self._headers["Origin"] = "http://d1.web2.qq.com"
-        # self._headers["Referer"] = "http://s.web2.qq.com/proxy.html?v=20130916001&callback=1&id=1"
-        # self._session.headers.update(self._headers)
+        self._headers["Origin"] = "https://d1.web2.qq.com"
+        self._headers["Referer"] = "https://d1.web2.qq.com/cfproxy.html?v=20151105001&callback=1"
+        self._session.headers.update(self._headers)
         p_data = {"ptwebqq": str(self._ptwebqq),
                   "clientid": 53999199,
                   "psessionid": str(self._psessionid),
@@ -175,12 +176,12 @@ class SmartQQRobot():
         r_data = {"r": json.dumps(p_data)}
         j_data = json.loads(self._session.post(url=get_msg_url, data=r_data).content.decode("utf-8"))
         print(j_data)
-        if j_data.keys("errmsg"):
-            return "None"
-        if j_data.keys("result"):# and  j_data["result"]["poll_type"] == "group_message":
-            return {"poll_type":j_data["result"]["poll_type"],
-                     "from_uin":j_data["result"]["value"]["from_uin"],
-                     "content":j_data["result"]["value"]["content"][1:]
+        if "errmsg" in j_data.keys():
+            return None
+        if "result" in j_data.keys():# and  j_data["result"]["poll_type"] == "group_message":
+            return {"poll_type":j_data["result"][0]["poll_type"],
+                     "from_uin":j_data["result"][0]["value"]["from_uin"],
+                     "content":j_data["result"][0]["value"]["content"][1:]
                     }
         return j_data
         '''{"errmsg":"error!!!","retcode":0}'''
@@ -199,14 +200,16 @@ class SmartQQRobot():
                         "group_code":1031415212,"msg_id":56815,"msg_type":0,"send_uin":2327452558,"time":1493305091,"to_uin":979885605}}],"retcode":0}'''
 
     def _get_self_info(self):
+        # 获取个人信息
         url = "http://s.web2.qq.com/api/get_self_info2?t=1493263376886"
         j_data = json.loads(self._session.get(url=url).content.decode("utf-8"))
         self._face = j_data["result"]["face"]
         print("我的QQ资料：")
         print(j_data)
-        return j_data
+        return j_data["result"]
 
     def _send_qun_msg(self,group_uin,msg):
+        # 发送QQ群信息
         url = "https://d1.web2.qq.com/channel/send_qun_msg2"
         p_data = {"group_uin":group_uin,
                 "content":'[\"' + str(msg) + '\",[\"font\",{\"name\":\"宋体\",\"size\":10,\"style\":[0,0,0],\"color\":\"000000\"}]]',
@@ -216,27 +219,27 @@ class SmartQQRobot():
                 "psessionid":str(self._psessionid)}
         r_data = {"r": json.dumps(p_data)}
         j_data = json.loads(self._session.post(url=url, data=r_data).content.decode("utf-8"))
-        print("群消息发送状态：%s" % j_data)
+        if "errCode" in j_data.keys() and j_data["msg"] == "send ok":
+            print("群消息发成功.")
+            return True
+        else:
+            print("群消息发失败.")
+            return False
 
-    def msg_robot(self):
-        self._get_self_info()
-        self._get_friends_info()
-
-        for group in self._get_group_info():
-            if group['name'] == "时光 年华":
-                group_uin = group['gid']
-                msg = "你们好啊，我是机器人！"
-                self._send_qun_msg(group_uin,msg)
-                time.sleep(10)
-        # while 1:
-            # self._get_chat_msg()
-            # self._send_qun_msg(group_uin)
-            # time.sleep(3)
-
-    def run(self):
-        self._login()
-        self.msg_robot()
-
-if __name__=="__main__":
-    qq = SmartQQRobot()
-    qq.run()
+    def _send_buddy_msg(self,uin,msg):
+        # 发送QQ好友消息
+        url = "https://d1.web2.qq.com/channel/send_buddy_msg2"
+        p_data = {"to": uin,
+                  "content": "[\""+ str(msg) +"\",[\"font\",{\"name\":\"宋体\",\"size\":10,\"style\":[0,0,0],\"color\":\"000000\"}]]",
+                  "face": self._face,
+                  "clientid": 53999199,
+                  "msg_id": 1530000 + random.randint(1000,10000),
+                  "psessionid": str(self._psessionid)}
+        r_data = {"r": json.dumps(p_data)}
+        j_data = json.loads(self._session.post(url=url, data=r_data).content.decode("utf-8"))
+        if "errCode" in j_data.keys() and j_data["msg"] == "send ok":
+            print("好友消息发成功.")
+            return True
+        else:
+            print("好友消息发失败.")
+            return False

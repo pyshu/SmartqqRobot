@@ -181,23 +181,9 @@ class SmartQQRobot():
         if "result" in j_data.keys():# and  j_data["result"]["poll_type"] == "group_message":
             return {"poll_type":j_data["result"][0]["poll_type"],
                      "from_uin":j_data["result"][0]["value"]["from_uin"],
-                     "content":j_data["result"][0]["value"]["content"][1:]
+                     "content":''.join(j_data["result"][0]["value"]["content"][1:])
                     }
         return j_data
-        '''{"errmsg":"error!!!","retcode":0}'''
-        '''{"result":[{"poll_type":"group_message",
-                      "value":{"content":[["font",{"color":"000000","name":"微软雅黑","size":10,"style":[0,0,0]}],"4"],
-                               "from_uin":1031415212,
-                                "group_code":1031415212,"msg_id":56791,"msg_type":0,"send_uin":2327452558,"time":1493302500,"to_uin":979885605}}],"retcode":0}
-        '''
-        '''{"result":[{"poll_type":"message",
-                      "value":{"content":[["font",{"color":"000000","name":"微软雅黑","size":10,"style":[0,0,0]}],"哈哈"],
-                      "from_uin":2327452558,
-                      "msg_id":56807,"msg_type":0,"time":1493304815,"to_uin":979885605}}],"retcode":0}'''
-        '''{"result":[{"poll_type":"group_message",
-                        "value":{"content":[["font",{"color":"000000","name":"微软雅黑","size":10,"style":[0,0,0]}],"哼哼","@时光1号",""," "],
-                        "from_uin":1031415212,
-                        "group_code":1031415212,"msg_id":56815,"msg_type":0,"send_uin":2327452558,"time":1493305091,"to_uin":979885605}}],"retcode":0}'''
 
     def _get_self_info(self):
         # 获取个人信息

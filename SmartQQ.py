@@ -26,7 +26,9 @@ class SmartQQ():
         # self._login_status = False
 
     def _show_QRC(self,content):
-        # 通过 tkinter 显示二维码.
+        '''
+        通过 tkinter 显示二维码.
+        '''
         if(content != None):
             root = tkinter.Tk()  #显示二维码
             root.title("扫描二维码")
@@ -41,14 +43,18 @@ class SmartQQ():
             print("二维码获取失败.")
 
     def _get_ptqrtoken(self):
+        '''
         # ptqrtoken 计算
+        '''
         token = 0
         for i in range(len(self._cookies_qrsig)):
             token += (token << 5) + ord(self._cookies_qrsig[i])
         return 2147483647 & token
 
     def _check_login_status(self,p):
+        '''
         # 登录状态检测
+        '''
         url = "https://ssl.ptlogin2.qq.com/ptqrlogin?ptqrtoken=" + str(self._get_ptqrtoken()) +\
               "&webqq_type=10&remember_uin=1&login2qq=1&aid=501004106" \
               "&u1=http%3A%2F%2Fw.qq.com%2Fproxy.html%3Flogin2qq%3D1%26webqq_type%3D10" \
@@ -71,6 +77,9 @@ class SmartQQ():
             time.sleep(3)
 
     def _login(self):
+        '''
+        # qq登陆过程
+        '''
         # 下面 url 中 t = ？，？为获取二维码请求随机数。
         url = "https://ssl.ptlogin2.qq.com/ptqrshow?appid=501004106&amp;e=0&amp;l=M&amp;s=5&amp;d=72&amp;v=4&amp;t=0.562284958449" + str(random.randint(10000,100000))
         content = self._session.get(url=url).content  #获取二维码数据（二进制）
@@ -116,6 +125,9 @@ class SmartQQ():
         print("恭喜，SmartQQ登录成功。")
 
     def _get_hash(self):
+        '''
+        # hash 值计算
+        '''
         uin = int(self._uin)
         ptwebqq = self._ptwebqq
         # hah = "0A4C0362501C02FE"
@@ -143,7 +155,9 @@ class SmartQQ():
         return buf
 
     def _get_group_info(self):
+        '''
         # 获取QQ群信息
+        '''
         url = "http://s.web2.qq.com/api/get_group_name_list_mask2"
         p_data = {"vfwebqq": str(self._vfwebqq), "hash": self._get_hash()}
         r_data = {"r": json.dumps(p_data)}
@@ -153,7 +167,9 @@ class SmartQQ():
         return j_data["result"]["gnamelist"]
 
     def _get_friends_info(self):
+        '''
         # 获取QQ好友信息
+        '''
         url = "http://s.web2.qq.com/api/get_user_friends2"
         p_data = {"vfwebqq": str(self._vfwebqq),"hash": self._get_hash()}
         r_data = {"r": json.dumps(p_data)}
@@ -163,7 +179,9 @@ class SmartQQ():
         return j_data
 
     def _recur_list(self,lst):
-        '''递归将list的元素处理成字符串，函数主要针对list内有list。'''
+        '''
+        递归将list的元素处理成字符串，函数主要针对list内有list。
+        '''
         con = ""
         for ele in lst:
             if isinstance(ele, list):
@@ -173,7 +191,9 @@ class SmartQQ():
         return con
 
     def _get_chat_msg(self):
+        '''
         # 接收消息
+        '''
         get_msg_url = "https://d1.web2.qq.com/channel/poll2"
         self._headers["Origin"] = "https://d1.web2.qq.com"
         self._headers["Referer"] = "https://d1.web2.qq.com/cfproxy.html?v=20151105001&callback=1"
@@ -197,7 +217,9 @@ class SmartQQ():
         return j_data
 
     def _get_self_info(self):
+        '''
         # 获取个人信息
+        '''
         url = "http://s.web2.qq.com/api/get_self_info2?t=1493263376886"
         j_data = json.loads(self._session.get(url=url).content.decode("utf-8"))
         self._face = j_data["result"]["face"]
@@ -206,7 +228,9 @@ class SmartQQ():
         return j_data["result"]
 
     def _send_qun_msg(self,group_uin,msg):
+        '''
         # 发送QQ群信息
+        '''
         url = "https://d1.web2.qq.com/channel/send_qun_msg2"
         p_data = {"group_uin":group_uin,
                 "content":'[\"' + str(msg) + '\",[\"font\",{\"name\":\"宋体\",\"size\":10,\"style\":[0,0,0],\"color\":\"000000\"}]]',
@@ -224,7 +248,9 @@ class SmartQQ():
             return False
 
     def _send_buddy_msg(self,uin,msg):
+        '''
         # 发送QQ好友消息
+        '''
         url = "https://d1.web2.qq.com/channel/send_buddy_msg2"
         p_data = {"to": uin,
                   "content": "[\""+ str(msg) +"\",[\"font\",{\"name\":\"宋体\",\"size\":10,\"style\":[0,0,0],\"color\":\"000000\"}]]",

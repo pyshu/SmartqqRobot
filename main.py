@@ -7,6 +7,9 @@ import messge_text
 import random
 
 def robot():
+    '''
+    # 简单回复机器人实现
+    '''
     qq = SmartQQ()
     qq._login() # 登录验证
     qq._get_self_info() # 获取个人信息，主要是获取gid,发送信息会用到。

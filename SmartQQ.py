@@ -20,10 +20,7 @@ class SmartQQ():
         self._vfwebqq = ""
         self._psessionid = ""
         self._uin = ""
-        self._clientid = 53999199
         self._face = 0
-		
-        # self._login_status = False
 
     def _show_QRC(self,content):
         '''
@@ -39,7 +36,6 @@ class SmartQQ():
             label.pack()
             root.mainloop()
         else:
-            # self._login_error = True
             print("二维码获取失败.")
 
     def _get_ptqrtoken(self):
@@ -98,7 +94,6 @@ class SmartQQ():
         # 请求获取 cookies 中 ptwebqq
         self._session.get(url=url)
         self._ptwebqq = (requests.utils.dict_from_cookiejar(self._session.cookies))["ptwebqq"]
-        # self._ptwebqq = json.loads(self._session.get(url=url).content.decode("utf-8"))["result"]["vfwebqq"]
         print("ptwebqq : %s" % self._ptwebqq)
 
         # 请求获取 json 中 vfwebqq
@@ -130,17 +125,15 @@ class SmartQQ():
         '''
         uin = int(self._uin)
         ptwebqq = self._ptwebqq
-        # hah = "0A4C0362501C02FE"
         ptb = [0,0,0,0]
         for i in range(len(ptwebqq)):
             ptb[i % 4] ^= ord(ptwebqq[i])
-        # salt = ["EC", "OK"]
         uin = int(uin)
         uinByte = [0,0,0,0]
-        uinByte[0] = uin >> 24 & 255 ^ 69
-        uinByte[1] = uin >> 16 & 255 ^ 67
-        uinByte[2] = uin >> 8 & 255 ^ 79
-        uinByte[3] = uin & 255 ^ 75
+        uinByte[0] = uin >> 24 & 255 ^ 69   # E
+        uinByte[1] = uin >> 16 & 255 ^ 67   # C
+        uinByte[2] = uin >> 8 & 255 ^ 79    # O
+        uinByte[3] = uin & 255 ^ 75         # K
         result = [0 for x in range(8)]
         for i in range(0,8):
             if(i % 2 == 0):
@@ -204,7 +197,6 @@ class SmartQQ():
                   "key": ""}
         r_data = {"r": json.dumps(p_data)}
         j_data = json.loads(self._session.post(url=get_msg_url, data=r_data).content.decode("utf-8"))
-        # print(j_data)
         if "errmsg" in j_data.keys():
             print(j_data)
             return None

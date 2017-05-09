@@ -219,6 +219,40 @@ class SmartQQ():
         print(j_data)
         return j_data["result"]
 
+    def _get_online_buddies2(self):
+        '''
+        # 获取QQ在线好友
+        '''
+        url = "http://d1.web2.qq.com/channel/get_online_buddies2?vfwebqq=" + str(self._vfwebqq) +\
+              "&clientid=53999199&psessionid="+ str(self._psessionid) +\
+              "&t=149429685" + str(random.randint(1000,10000))
+        # self._headers["Host"] = "d1.web2.qq.com"
+        # self._headers["Referer"] = "http://d1.web2.qq.com/proxy.html?v=20151105001&callback=1&id=2"
+        # self._session.headers.update(self._headers)
+        j_data = json.loads(self._session.get(url=url).content.decode("utf-8"))
+        print("QQ在线好友：")
+        print(j_data)
+        return j_data["result"]
+
+    def _get_recent_list2(self):
+        '''
+        # 获取最近列表
+        '''
+        url = "http://d1.web2.qq.com/channel/get_recent_list2"
+        # self._headers["Host"] = "d1.web2.qq.com"
+        # self._headers["Origin"] = "http://d1.web2.qq.com"
+        # self._headers["Referer"] = "http://d1.web2.qq.com/proxy.html?v=20151105001&callback=1&id=2"
+        # self._session.headers.update(self._headers)
+        p_data = {"vfwebqq":str(self._vfwebqq),"clientid":53999199,"psessionid": str(self._psessionid)}
+        r_data = {"r": json.dumps(p_data)}
+        j_data = json.loads(self._session.post(url=url, data=r_data).content.decode("utf-8"))
+        print("QQ最近列表：")
+        print(j_data)
+        if "errmsg" in j_data.keys():
+            print(j_data)
+            return None
+        return j_data["result"]
+
     def _send_qun_msg(self,group_uin,msg):
         '''
         # 发送QQ群信息

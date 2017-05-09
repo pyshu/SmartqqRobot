@@ -13,7 +13,9 @@ def robot():
     qq = SmartQQ()
     qq._login() # 登录验证
     qq._get_self_info() # 获取个人信息，主要是获取gid,发送信息会用到。
-    # qq._get_friends_info() # 获取好友列表
+    qq._get_friends_info() # 获取好友列表
+    qq._get_online_buddies2() # 获取在线好友
+    qq._get_recent_list2() # 获取最近列表
     groups = qq._get_group_info() # 获取群列表
     robot_group_uin = 0 # 监控的群名称。
     # 设置想监控的群列表

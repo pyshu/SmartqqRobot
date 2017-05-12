@@ -1,5 +1,5 @@
 #  SmartQQRobot    
-基于python实现的QQ自动回复机器人
+基于python实现的QQ机器人
     
 功能：   
 1、登录验证过程   
@@ -27,6 +27,10 @@ qq._get_chat_msg() # 接收消息
       
 --------------------------------     
 qq._get_friends_info() # 获取好友列表    
+    
+qq._get_online_buddies2() # 获取在线好友列表     
+     
+qq._get_recent_list2() # 获取最近列表	 
       
 注意:    
 1、如能让SmartQQ收到消息，经实测必须退出PC上QQ客户端。    

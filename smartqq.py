@@ -21,6 +21,7 @@ class SmartQQ():
         self._psessionid = ""
         self._uin = ""
         self._face = 0
+        self._qqnum = 0
 
     def _show_QRC(self,content):
         '''
@@ -215,6 +216,7 @@ class SmartQQ():
         url = "http://s.web2.qq.com/api/get_self_info2?t=1493263376886"
         j_data = json.loads(self._session.get(url=url).content.decode("utf-8"))
         self._face = j_data["result"]["face"]
+        self._qqnum = j_data["result"]["account"]
         print("我的QQ资料：")
         print(j_data)
         return j_data["result"]
@@ -292,3 +294,20 @@ class SmartQQ():
         else:
             print("好友消息发失败.")
             return False
+
+    def _get_self_img(self):
+        headers = self._session.headers
+        # self._headers["Cache-Control"] = "max-age=2592000"
+        # self._headers["Content-Length"] = "9385"
+        # self._headers["Content-Type"] = "image/gif"
+        # self._headers["Server"] = "ImgHttp3.0.0" Accept:
+        self._headers["Accept"] = "image/webp,image/*,*/*;q=0.8"
+        self._headers["Host"] = "q.qlogo.cn"
+        self._headers["Referer"] = "http://w.qq.com/"
+        self._session.headers.update(self._headers)
+        url = 'http://q.qlogo.cn/g?b=qq&nk='+ str(self._qqnum) +'&s=100&t=149673935' + str(random.randint(1000, 10000))
+        content = self._session.get(url=url).content
+        self._session.headers.update(headers)
+        print(content)
+        return content
+

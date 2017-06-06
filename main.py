@@ -1,6 +1,7 @@
 __author__ = 'lius'
 
 from smartqq import SmartQQ
+from gui import Window
 import os
 import time
 import messge_text
@@ -12,7 +13,7 @@ def robot():
     '''
     qq = SmartQQ()
     qq._login() # 登录验证
-    qq._get_self_info() # 获取个人信息，主要是获取gid,发送信息会用到。
+    dat = qq._get_self_info() # 获取个人信息，主要是获取gid,发送信息会用到。
     qq._get_friends_info() # 获取好友列表
     qq._get_online_buddies2() # 获取在线好友
     qq._get_recent_list2() # 获取最近列表
@@ -26,6 +27,10 @@ def robot():
         print("没有监控的群列表,程序退出.")
         os._exit(0)
     # 循环主题
+    w = Window()
+    img = qq._get_self_img()
+    w.show_self_info(img=img, data=dat)
+    w.run()
     while 1:
         get_msg = qq._get_chat_msg()
         if get_msg != None and get_msg["poll_type"] == "group_message" and get_msg["from_uin"] == robot_group_uin:

@@ -5,6 +5,7 @@ from tkinter import *
 import tkinter.scrolledtext
 import datetime
 import time
+from PIL import ImageTk, Image
 
 from tkinter.scrolledtext import ScrolledText
 
@@ -44,8 +45,9 @@ class Window():
         Label(self.frame_right_2, text="邮箱：", width=6, height=1).grid(row=8, column=0, sticky='W', pady=2)
         Label(self.frame_right_2, text="face：", width=6, height=1).grid(row=9, column=0, sticky='W', pady=2)
 
-        self.img_label = Label(self.frame_right_2, image = None, width=20, height=6,bg="#FFF")
+        self.img_label = Label(self.frame_right_2, width=160, height=160,bg="#000")
         self.img_label.grid(row=0, column=0, columnspan=2, rowspan=2, ipadx=2, pady=2)
+        # self.img_label.create_image(160,160,image=None)
         Label(self.frame_right_2, textvariable=self.name_label_text, width=16, height=1, justify='left').grid(row=2, column=1, pady=2)
         Label(self.frame_right_2, textvariable=self.qq_label_text, width=16, height=1).grid(row=3, column=1, pady=2)
         Label(self.frame_right_2, textvariable=self.sex_label_text, width=16, height=1).grid(row=4, column=1, pady=2)
@@ -86,7 +88,10 @@ class Window():
 
     # 显示个人信息
     def show_self_info(self, img=None, data=None):
-        # self.img_label.configure(image=img)
+        print(img)
+        self.img_label.configure(image=PhotoImage(data=img))
+        # img1 = PhotoImage(data=img)
+        # self.img_label.create_image(50, 50, anchor=NE, image=img1)
         if data != None:
             self.name_label_text.set(data['nick'])
             self.qq_label_text.set(str(data['account']))
@@ -107,3 +112,9 @@ class Window():
 if __name__=="__main__":
     w = Window()
     w.run()
+
+# from PIL import Image
+# im = Image.open(r"C:\jk.png")
+# bg = Image.new("RGB", im.size, (255,255,255))
+# bg.paste(im,im)
+# bg.save(r"C:\jk2.jpg")

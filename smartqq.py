@@ -216,7 +216,7 @@ class SmartQQ():
         url = "http://s.web2.qq.com/api/get_self_info2?t=1493263376886"
         j_data = json.loads(self._session.get(url=url).content.decode("utf-8"))
         self._face = j_data["result"]["face"]
-        self._qqnum = j_data["result"]["account"]
+        # self._qqnum = j_data["result"]["account"]
         print("我的QQ资料：")
         print(j_data)
         return j_data["result"]
@@ -305,7 +305,7 @@ class SmartQQ():
         self._headers["Host"] = "q.qlogo.cn"
         self._headers["Referer"] = "http://w.qq.com/"
         self._session.headers.update(self._headers)
-        url = 'http://q.qlogo.cn/g?b=qq&nk='+ str(self._qqnum) +'&s=100&t=149673935' + str(random.randint(1000, 10000))
+        url = 'http://q.qlogo.cn/g?b=qq&nk='+ str(self._uin) +'&s=100&t=149673935' + str(random.randint(1000, 10000))
         content = self._session.get(url=url).content
         self._session.headers.update(headers)
         print(content)

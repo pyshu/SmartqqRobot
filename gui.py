@@ -2,15 +2,10 @@
 __author__ = 'lius'
 
 from tkinter import *
-import tkinter.scrolledtext
-import datetime
 import time
 import os
 from tkinter.scrolledtext import ScrolledText
-import threading
 
-from PIL import ImageTk, Image
-# bm = 0
 class Window():
     def __init__(self):
         self.root = Tk()
@@ -59,7 +54,7 @@ class Window():
         self.face_label_text = StringVar()
 
         Label(self.frame_right_2, text="昵称：", width=6, height=1).grid(row=2, column=0, sticky='W', pady=2)
-        Label(self.frame_right_2, text="qq号：", width=6, height=1).grid(row=3, column=0, sticky='W', pady=2)
+        Label(self.frame_right_2, text="QQ ：", width=6, height=1).grid(row=3, column=0, sticky='W', pady=2)
         Label(self.frame_right_2, text="性别：", width=6, height=1).grid(row=4, column=0, sticky='W', pady=2)
         Label(self.frame_right_2, text="生日：", width=6, height=1).grid(row=6, column=0, sticky='W', pady=2)
         Label(self.frame_right_2, text="位置：", width=6, height=1).grid(row=7, column=0, sticky='W', pady=2)
@@ -80,8 +75,6 @@ class Window():
 
         self.frame_right_2.grid_propagate(0)
 
-
-
     # 显示消息事件
     def show_message(self,data=None):
         if self.text_msgsend.get('0.0', END) != '\n' or data != None:
@@ -101,9 +94,12 @@ class Window():
             os.mkdir('temp')
         with open('./temp/my.png', "w+b") as code:
             code.write(img)
-        bm = PhotoImage(file="./temp/my.png")
-        self.img_label.configure(image=bm)
-        self.img_label.bm = bm
+        try:
+            bm = PhotoImage(file="./temp/my.png")
+            self.img_label.configure(image=bm)
+            self.img_label.bm = bm
+        except:
+            pass
         if os.path.isfile('./temp/my.png'):
             os.remove("./temp/my.png")
 
@@ -120,20 +116,9 @@ class Window():
     def show_cfg_info(self):
         pass
 
-    def after_call(self,call_func):
-        self.root.after(2000,call_func)
-
-    # @staticmethod
-    # def loop(self):
-    #     # 主事件循环
-    #     self.root.mainloop()
-
     def run(self):
-        def loop(self):
-            # 主事件循环
-            self.root.mainloop()
-        t = threading.Thread(target=loop)
-        t.start()
+        # 主事件循环
+        self.root.mainloop()
 
 if __name__=="__main__":
     w = Window()

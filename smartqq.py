@@ -296,18 +296,12 @@ class SmartQQ():
             return False
 
     def _get_self_img(self):
-        headers = self._session.headers
-        # self._headers["Cache-Control"] = "max-age=2592000"
-        # self._headers["Content-Length"] = "9385"
-        # self._headers["Content-Type"] = "image/gif"
-        # self._headers["Server"] = "ImgHttp3.0.0" Accept:
-        self._headers["Accept"] = "image/webp,image/*,*/*;q=0.8"
-        self._headers["Host"] = "q.qlogo.cn"
-        self._headers["Referer"] = "http://w.qq.com/"
+        # self._headers["Accept"] = "image/webp,image/*,*/*;q=0.8"
+        # self._headers["Host"] = "q.qlogo.cn"
+        # self._headers["Referer"] = "http://w.qq.com/"
         self._session.headers.update(self._headers)
         url = 'http://q.qlogo.cn/g?b=qq&nk='+ str(self._uin) +'&s=100&t=149673935' + str(random.randint(1000, 10000))
         content = self._session.get(url=url).content
-        self._session.headers.update(headers)
         print(content)
         return content
 

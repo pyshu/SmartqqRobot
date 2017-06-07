@@ -5,28 +5,50 @@ from tkinter import *
 import tkinter.scrolledtext
 import datetime
 import time
-from PIL import ImageTk, Image
-
+import os
 from tkinter.scrolledtext import ScrolledText
+import threading
 
+from PIL import ImageTk, Image
+# bm = 0
 class Window():
     def __init__(self):
         self.root = Tk()
         self.root.title("QQ机器人")
-        # root.geometry('200x150')  # 设置窗口大小
-        self.num = StringVar()
         self.root.resizable(width=False, height=False)  # 窗口大小不可变
-        # 创建几个frame作为容器
+
+        # 创建三个frame作为容器
         self.frame_left_top = LabelFrame(self.root, width=380, height=270, bg='white', text=" 消息显示 ")
         self.frame_left_center = LabelFrame(self.root, width=380, height=100, bg='white', text=" 编辑消息 ")
         self.frame_left_bottom = Frame(width=380, height=30)
-        self.frame_right_1 = LabelFrame(self.root, width=170, height=400, bg='white', text=" ROBOT配置 ")
+        self.frame_left_top.grid_propagate(0)
+        self.frame_left_center.grid_propagate(0)
+        self.frame_left_bottom.grid_propagate(0)
 
-        # 创建需要的几个元素
+        # 左侧消息栏
         self.text_msglist = ScrolledText(self.frame_left_top, width=51, height=19, borderwidth = 0, state = 'normal',wrap=WORD)
-        self.text_msg = ScrolledText(self.frame_left_center, width=51,height=6,borderwidth = 0)
-        self.button_sendmsg = Button(self.frame_left_bottom, text='发送', command=self.show_message)
+        self.text_msgsend = ScrolledText(self.frame_left_center, width=51,height=6,borderwidth = 0)
+        self.button_sendmsg = Button(self.frame_left_bottom, text='发送', command=self.show_message, width=8)
+        # 创建绿色的tag    http://www.jianshu.com/p/b2dc1aa68ce9
+        self.text_msglist.tag_config('green', foreground='#008B00')
 
+        self.frame_left_top.grid(row=0, column=0, rowspan=1, padx=5, pady=7)
+        self.frame_left_center.grid(row=1, column=0, rowspan=1, padx=2, pady=2)
+        self.frame_left_bottom.grid(row=2, column=0, pady=5)
+
+        # 把元素填充进去
+        self.text_msglist.grid()
+        self.text_msgsend.grid()
+        self.button_sendmsg.grid(padx=295, sticky=W)
+        self.text_msglist.grid()
+
+        # 中间配置栏
+        self.frame_right_1 = LabelFrame(self.root, width=170, height=400, bg='white', text=" ROBOT配置 ")
+        self.frame_right_1.grid(row=0, column=1, rowspan=3, padx=4, pady=5, ipadx=2, ipady=5)
+
+        # 右边个人信息栏
+        self.frame_right_2 = LabelFrame(self.root, width=170, height=400, bg='white', text=" QQ信息 ")
+        self.frame_right_2.grid(row=0, column=2, rowspan=3, padx=4, pady=5, ipadx=2, ipady=5)
         self.name_label_text = StringVar()
         self.qq_label_text = StringVar()
         self.sex_label_text = StringVar()
@@ -36,7 +58,6 @@ class Window():
         self.emil_label_text = StringVar()
         self.face_label_text = StringVar()
 
-        self.frame_right_2 = LabelFrame(self.root, width=170, height=400, bg='white', text=" QQ信息 ")
         Label(self.frame_right_2, text="昵称：", width=6, height=1).grid(row=2, column=0, sticky='W', pady=2)
         Label(self.frame_right_2, text="qq号：", width=6, height=1).grid(row=3, column=0, sticky='W', pady=2)
         Label(self.frame_right_2, text="性别：", width=6, height=1).grid(row=4, column=0, sticky='W', pady=2)
@@ -45,9 +66,10 @@ class Window():
         Label(self.frame_right_2, text="邮箱：", width=6, height=1).grid(row=8, column=0, sticky='W', pady=2)
         Label(self.frame_right_2, text="face：", width=6, height=1).grid(row=9, column=0, sticky='W', pady=2)
 
-        self.img_label = Label(self.frame_right_2, width=160, height=160,bg="#000")
+        bm = PhotoImage(file="./temp/QQ.png")
+        self.img_label = Label(self.frame_right_2, image=bm, width=160, height=160, bg="#FFF")
+        self.img_label.bm = bm
         self.img_label.grid(row=0, column=0, columnspan=2, rowspan=2, ipadx=2, pady=2)
-        # self.img_label.create_image(160,160,image=None)
         Label(self.frame_right_2, textvariable=self.name_label_text, width=16, height=1, justify='left').grid(row=2, column=1, pady=2)
         Label(self.frame_right_2, textvariable=self.qq_label_text, width=16, height=1).grid(row=3, column=1, pady=2)
         Label(self.frame_right_2, textvariable=self.sex_label_text, width=16, height=1).grid(row=4, column=1, pady=2)
@@ -56,42 +78,35 @@ class Window():
         Label(self.frame_right_2, textvariable=self.emil_label_text, width=16, height=1).grid(row=8, column=1, pady=2)
         Label(self.frame_right_2, textvariable=self.face_label_text, width=16, height=1).grid(row=9, column=1, pady=2)
 
-        # 创建一个绿色的tag    http://www.jianshu.com/p/b2dc1aa68ce9
-        self.text_msglist.tag_config('green', foreground='#008B00')
-        # 使用grid设置各个容器位置
-        self.frame_left_top.grid(row=0, column=0, rowspan=1, padx=5, pady=5)
-        self.frame_left_center.grid(row=1, column=0, rowspan=1, padx=2, pady=5)
-        self.frame_left_bottom.grid(row=2, column=0)
-        self.frame_right_1.grid(row=0, column=1, rowspan=3, padx=4, pady=5, ipadx=2, ipady=5)
-        self.frame_right_2.grid(row=0, column=2, rowspan=3, padx=4, pady=5, ipadx=2, ipady=5)
-
-        # self.text_msglist.grid()
-        self.frame_left_top.grid_propagate(0)
-        self.frame_left_center.grid_propagate(0)
-        self.frame_left_bottom.grid_propagate(0)
         self.frame_right_2.grid_propagate(0)
-        # 把元素填充进frame
-        self.text_msglist.grid()
-        self.text_msg.grid()
-        self.button_sendmsg.grid(row=0, sticky=W)
-        # self.img_label.grid(row=0, column=2)
+
 
 
     # 显示消息事件
     def show_message(self,data=None):
-        # 在聊天内容上方加一行 显示发送人及发送时间
-        msgcontent = 'robot:' + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + '\n '
-        self.text_msglist.insert(END, msgcontent, 'green')
-        self.text_msglist.insert(END, self.text_msg.get('0.0', END))
-        self.text_msg.delete('0.0', END)
-        self.text_msglist.see(END)
+        if self.text_msgsend.get('0.0', END) != '\n' or data != None:
+            # 在聊天内容上方加一行 显示发送人及发送时间
+            msgcontent = 'robot:' + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + '\n '
+            self.text_msglist.insert(END, msgcontent, 'green')
+            if data != None:
+                self.text_msglist.insert(END, data + '\n')
+            else:
+                self.text_msglist.insert(END, self.text_msgsend.get('0.0', END))
+            self.text_msgsend.delete('0.0', END)
+            self.text_msglist.see(END)
 
     # 显示个人信息
     def show_self_info(self, img=None, data=None):
-        print(img)
-        self.img_label.configure(image=PhotoImage(data=img))
-        # img1 = PhotoImage(data=img)
-        # self.img_label.create_image(50, 50, anchor=NE, image=img1)
+        if not os.path.isdir('temp'):
+            os.mkdir('temp')
+        with open('./temp/my.png', "w+b") as code:
+            code.write(img)
+        bm = PhotoImage(file="./temp/my.png")
+        self.img_label.configure(image=bm)
+        self.img_label.bm = bm
+        if os.path.isfile('./temp/my.png'):
+            os.remove("./temp/my.png")
+
         if data != None:
             self.name_label_text.set(data['nick'])
             self.qq_label_text.set(str(data['account']))
@@ -105,16 +120,23 @@ class Window():
     def show_cfg_info(self):
         pass
 
+    def after_call(self,call_func):
+        self.root.after(2000,call_func)
+
+    # @staticmethod
+    # def loop(self):
+    #     # 主事件循环
+    #     self.root.mainloop()
+
     def run(self):
-        # 主事件循环
-        self.root.mainloop()
+        def loop(self):
+            # 主事件循环
+            self.root.mainloop()
+        t = threading.Thread(target=loop)
+        t.start()
 
 if __name__=="__main__":
     w = Window()
     w.run()
 
-# from PIL import Image
-# im = Image.open(r"C:\jk.png")
-# bg = Image.new("RGB", im.size, (255,255,255))
-# bg.paste(im,im)
-# bg.save(r"C:\jk2.jpg")
+

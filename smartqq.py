@@ -234,6 +234,8 @@ class SmartQQ():
         except:
             print('Fetch message exception!')
             return None
+        # {"result":[{"poll_type":"group_message","value":{"content":[["font",{"color":"000000","name":"微软雅黑","size":10,"style":[0,0,0]}],"好"],"from_uin":2324333159,"group_code":2324333159,"msg_id":18317,"msg_type":4,"send_uin":1550070579,"time":1496933934,"to_uin":979885605}}],"retcode":0}
+        # {"result":[{"poll_type":"message","value":{"content":[["font",{"color":"000000","name":"微软雅黑","size":10,"style":[0,0,0]}],"哈哈哈哈"],"from_uin":1550070579,"msg_id":18321,"msg_type":1,"time":1496934177,"to_uin":979885605}}],"retcode":0}
 
     def _get_online_buddies2(self):
         '''

@@ -109,29 +109,46 @@ class Window():
         self.flb_pull_down_combobox.set('请选择')
 
     # 发送消息
-    def send_message(self, usr, data=None):
-        status = self.flb_radVar.get()
-        if status == 0:
-            self.smartqq._send_buddy_msg(friends[usr]['uin'], data)
-        if status == 1:
-            self.smartqq._send_qun_msg(groups[usr]['gid'], data)
+    # def send_message(self, usr, data=None):
+    #     status = self.flb_radVar.get()
+    #     if status == 0:
+    #         self.smartqq._send_buddy_msg(friends[usr]['uin'], data)
+    #     if status == 1:
+    #         self.smartqq._send_qun_msg(groups[usr]['gid'], data)
 
     # 显示消息事件
     def show_message(self,data=None):
-        if self.text_msgsend.get('0.0', END) != '\n' or data != None:
+        msg = self.text_msgsend.get('0.0', END)
+        if msg != '\n' or data != None:
             # 在聊天内容上方加一行 显示发送人及发送时间
-            msgcontent = '发来的信息 : ' + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + '\n '
-            if data != None:
+            date = ':' + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + '\n'
+            msgcontent = ''
+            if data != None: # 接收消息显示处理
+                if data['poll_type'] == "group_message":
+                    for v in groups.values():
+                        if v['gid'] == data['from_uin']:
+                            msgcontent = '来自 '+ v['name'] + '(群)' + date
+                            break
+                if data['poll_type'] == "message":
+                    for v in friends.values():
+                        if v['uin'] == data['from_uin']:
+                            msgcontent = '来自 '+ v['nick'] + '(好友)' + date
+                            break
                 self.text_msglist.insert(END, msgcontent, 'green')
-                self.text_msglist.insert(END, data + '\n')
-            else:
+                self.text_msglist.insert(END, data['content'] + '\n')
+            else:  # 发送消息显示处理
                 usr = self.flb_pull_down_combobox.get()
-                msgcontent = str(self.smartqq._qqname) + ' to '+ str(usr) + ':' + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + '\n '
+                status = self.flb_radVar.get()
+                if status == 0:
+                    msgcontent = '发送 '+ str(usr) + '(好友)' + date
+                    self.smartqq._send_buddy_msg(friends[usr]['uin'], msg[:-1])
+                if status == 1:
+                    msgcontent = '发送 '+ str(usr) + '(群)' + date
+                    self.smartqq._send_qun_msg(groups[usr]['gid'], msg[:-1])
                 self.text_msglist.insert(END, msgcontent, 'green')
-                msg = self.text_msgsend.get('0.0', END)
                 self.text_msglist.insert(END, msg)
-                msg = msg[:-1]
-                self.send_message(usr, msg)
+                # msg = msg[:-1]
+                # self.send_message(usr, msg)
             self.text_msgsend.delete('0.0', END)
             self.text_msglist.see(END)
 

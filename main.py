@@ -40,9 +40,10 @@ def robot():
     def recv_func():
         while 1:
             get_msg = qq._get_chat_msg()
-            if get_msg != None and get_msg["poll_type"] == "group_message" and get_msg["from_uin"] == robot_group_uin:
+            if get_msg != None:
                 print(get_msg)
-                w.show_message(get_msg["content"])
+                w.show_message(get_msg)
+            if get_msg != None and get_msg["poll_type"] == "group_message" and get_msg["from_uin"] == robot_group_uin:
                 if get_msg["content"].find("@时光1号") >= 0:
                     if get_msg["content"].find("自动回复") >= 0:
                         msg = messge_text.messge_re[random.randint(0, 53)]

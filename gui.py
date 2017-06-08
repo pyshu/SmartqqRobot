@@ -2,12 +2,17 @@
 __author__ = 'lius'
 
 from tkinter import *
+from tkinter import ttk
 import time
 import os
 from tkinter.scrolledtext import ScrolledText
 
+groups = {}
+friends = {}
+
 class Window():
-    def __init__(self):
+    def __init__(self,qq):
+        self.smartqq = qq
         self.root = Tk()
         self.root.title("QQ机器人")
         self.root.resizable(width=False, height=False)  # 窗口大小不可变
@@ -31,10 +36,27 @@ class Window():
         self.frame_left_center.grid(row=1, column=0, rowspan=1, padx=2, pady=2)
         self.frame_left_bottom.grid(row=2, column=0, pady=5)
 
+        # 单选框实现
+        Label(self.frame_left_bottom, text="发送选择：", width=6, height=1).grid(row=0, column=0, ipadx=15, pady=2)
+
+        self.flb_radVar = IntVar()  # 通过tk.IntVar() 获取单选按钮value参数对应的值
+        self.flb_radVar.set(99)
+        self.flb_fir_curRad = Radiobutton(self.frame_left_bottom, width=2, height=1,  text='好友', variable=self.flb_radVar, value=0,command=self.flb_radCall)  # 当该单选按钮被点击时，会触发参数command对应的函数
+        self.flb_grp_curRad = Radiobutton(self.frame_left_bottom, width=4, height=1, text='群', variable=self.flb_radVar, value=1,command=self.flb_radCall)
+        self.flb_fir_curRad.grid(column=1, row=0,)  # 参数sticky对应的值参考复选框的解释
+        self.flb_grp_curRad.grid(column=2, row=0,)
+
+        # 一个下拉列表
+        self.flb_pull_down_number = StringVar()
+        self.flb_pull_down_combobox = ttk.Combobox(self.frame_left_bottom, width=16, height=3, textvariable=self.flb_pull_down_number, state='readonly')
+        self.flb_pull_down_combobox['values'] = ("请选择")  # 设置下拉列表的值
+        self.flb_pull_down_combobox.grid(column=3, row=0)  # 设置其在界面中出现的位置  column代表列   row 代表行
+        self.flb_pull_down_combobox.current(0)  # 设置下拉列表默认显示的值，0为 numberChosen['values'] 的下标值
+
         # 把元素填充进去
         self.text_msglist.grid()
         self.text_msgsend.grid()
-        self.button_sendmsg.grid(padx=295, sticky=W)
+        self.button_sendmsg.grid(column=4, row=0, padx=2, sticky=W)
         self.text_msglist.grid()
 
         # 中间配置栏
@@ -75,16 +97,41 @@ class Window():
 
         self.frame_right_2.grid_propagate(0)
 
+    # 单选按钮回调函数,就是当单选按钮被点击会执行该函数
+    def flb_radCall(self):
+        radSel = self.flb_radVar.get()
+        if radSel == 0:
+            self.flb_pull_down_combobox['values'] = tuple(friends.keys())  # 设置下拉列表的值
+            print(self.flb_radVar.get())
+        elif radSel == 1:
+            self.flb_pull_down_combobox['values'] = tuple(groups.keys())  # 设置下拉列表的值
+            print(self.flb_radVar.get())
+        self.flb_pull_down_combobox.set('请选择')
+
+    # 发送消息
+    def send_message(self, usr, data=None):
+        status = self.flb_radVar.get()
+        if status == 0:
+            self.smartqq._send_buddy_msg(friends[usr]['uin'], data)
+        if status == 1:
+            self.smartqq._send_qun_msg(groups[usr]['gid'], data)
+
     # 显示消息事件
     def show_message(self,data=None):
         if self.text_msgsend.get('0.0', END) != '\n' or data != None:
             # 在聊天内容上方加一行 显示发送人及发送时间
-            msgcontent = 'robot:' + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + '\n '
-            self.text_msglist.insert(END, msgcontent, 'green')
+            msgcontent = '发来的信息 : ' + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + '\n '
             if data != None:
+                self.text_msglist.insert(END, msgcontent, 'green')
                 self.text_msglist.insert(END, data + '\n')
             else:
-                self.text_msglist.insert(END, self.text_msgsend.get('0.0', END))
+                usr = self.flb_pull_down_combobox.get()
+                msgcontent = str(self.smartqq._qqname) + ' to '+ str(usr) + ':' + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + '\n '
+                self.text_msglist.insert(END, msgcontent, 'green')
+                msg = self.text_msgsend.get('0.0', END)
+                self.text_msglist.insert(END, msg)
+                msg = msg[:-1]
+                self.send_message(usr, msg)
             self.text_msgsend.delete('0.0', END)
             self.text_msglist.see(END)
 

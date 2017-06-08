@@ -22,6 +22,7 @@ class SmartQQ():
         self._uin = ""
         self._face = 0
         self._qqnum = 0
+        self._qqname = ''
 
     def _show_QRC(self,content):
         '''
@@ -148,30 +149,6 @@ class SmartQQ():
             buf += hex[i & 15]
         return buf
 
-    def _get_group_info(self):
-        '''
-        # 获取QQ群信息
-        '''
-        url = "http://s.web2.qq.com/api/get_group_name_list_mask2"
-        p_data = {"vfwebqq": str(self._vfwebqq), "hash": self._get_hash()}
-        r_data = {"r": json.dumps(p_data)}
-        j_data = json.loads(self._session.post(url=url, data=r_data).content.decode("utf-8"))
-        print("QQ群：")
-        print(j_data["result"]["gnamelist"])
-        return j_data["result"]["gnamelist"]
-
-    def _get_friends_info(self):
-        '''
-        # 获取QQ好友信息
-        '''
-        url = "http://s.web2.qq.com/api/get_user_friends2"
-        p_data = {"vfwebqq": str(self._vfwebqq),"hash": self._get_hash()}
-        r_data = {"r": json.dumps(p_data)}
-        j_data = json.loads(self._session.post(url=url, data=r_data).content.decode("utf-8"))
-        print("QQ好友信息：")
-        print(j_data)
-        return j_data
-
     def _recur_list(self,lst):
         '''
         递归将list的元素处理成字符串，函数主要针对list内有list。
@@ -183,6 +160,51 @@ class SmartQQ():
             else:
                 con += str(ele)
         return con
+
+    def _get_self_info(self):
+        '''
+        # 获取个人信息
+        '''
+        url = "http://s.web2.qq.com/api/get_self_info2?t=1493263376886"
+        try:
+            j_data = json.loads(self._session.get(url=url).content.decode("utf-8"))
+            self._face = j_data["result"]["face"]
+            self._qqname = j_data["result"]["nick"]
+            # self._qqnum = j_data["result"]["account"]
+            print("我的QQ资料：%s" % j_data["result"])
+            return j_data["result"]
+        except:
+            return None
+
+    def _get_group_info(self):
+        '''
+        # 获取QQ群信息
+        '''
+        url = "http://s.web2.qq.com/api/get_group_name_list_mask2"
+        p_data = {"vfwebqq": str(self._vfwebqq), "hash": self._get_hash()}
+        r_data = {"r": json.dumps(p_data)}
+        try:
+            j_data = json.loads(self._session.post(url=url, data=r_data).content.decode("utf-8"))
+            groups_data = { k['name']: k for k in j_data["result"]["gnamelist"] }
+            print("QQ群：%s" % groups_data)
+            return groups_data
+        except:
+            return None
+
+    def _get_friends_info(self):
+        '''
+        # 获取QQ好友信息
+        '''
+        url = "http://s.web2.qq.com/api/get_user_friends2"
+        p_data = {"vfwebqq": str(self._vfwebqq),"hash": self._get_hash()}
+        r_data = {"r": json.dumps(p_data)}
+        try:
+            j_data = json.loads(self._session.post(url=url, data=r_data).content.decode("utf-8"))
+            friends_data = { k['nick']: k for k in j_data["result"]["info"] }
+            print("QQ好友信息：%s" % friends_data)
+            return friends_data
+        except:
+            return None
 
     def _get_chat_msg(self):
         '''
@@ -197,29 +219,21 @@ class SmartQQ():
                   "psessionid": str(self._psessionid),
                   "key": ""}
         r_data = {"r": json.dumps(p_data)}
-        j_data = json.loads(self._session.post(url=get_msg_url, data=r_data).content.decode("utf-8"))
-        if "errmsg" in j_data.keys():
-            print(j_data)
+        try:
+            j_data = json.loads(self._session.post(url=get_msg_url, data=r_data).content.decode("utf-8"))
+            if "errmsg" in j_data.keys():
+                print(j_data)
+                return None
+            if "result" in j_data.keys():
+                content = self._recur_list(j_data["result"][0]["value"]["content"][1:])
+                return {"poll_type": j_data["result"][0]["poll_type"],
+                        "from_uin": j_data["result"][0]["value"]["from_uin"],
+                        "content": content
+                        }
+            return j_data
+        except:
+            print('Fetch message exception!')
             return None
-        if "result" in j_data.keys():# and  j_data["result"]["poll_type"] == "group_message":
-            content = self._recur_list(j_data["result"][0]["value"]["content"][1:])
-            return {"poll_type":j_data["result"][0]["poll_type"],
-                     "from_uin":j_data["result"][0]["value"]["from_uin"],
-                     "content": content
-                    }
-        return j_data
-
-    def _get_self_info(self):
-        '''
-        # 获取个人信息
-        '''
-        url = "http://s.web2.qq.com/api/get_self_info2?t=1493263376886"
-        j_data = json.loads(self._session.get(url=url).content.decode("utf-8"))
-        self._face = j_data["result"]["face"]
-        # self._qqnum = j_data["result"]["account"]
-        print("我的QQ资料：")
-        print(j_data)
-        return j_data["result"]
 
     def _get_online_buddies2(self):
         '''
@@ -231,10 +245,12 @@ class SmartQQ():
         # self._headers["Host"] = "d1.web2.qq.com"
         # self._headers["Referer"] = "http://d1.web2.qq.com/proxy.html?v=20151105001&callback=1&id=2"
         # self._session.headers.update(self._headers)
-        j_data = json.loads(self._session.get(url=url).content.decode("utf-8"))
-        print("QQ在线好友：")
-        print(j_data)
-        return j_data["result"]
+        try:
+            j_data = json.loads(self._session.get(url=url).content.decode("utf-8"))
+            print("QQ在线好友：%s" % j_data["result"])
+            return j_data["result"]
+        except:
+            return None
 
     def _get_recent_list2(self):
         '''
@@ -247,13 +263,15 @@ class SmartQQ():
         # self._session.headers.update(self._headers)
         p_data = {"vfwebqq":str(self._vfwebqq),"clientid":53999199,"psessionid": str(self._psessionid)}
         r_data = {"r": json.dumps(p_data)}
-        j_data = json.loads(self._session.post(url=url, data=r_data).content.decode("utf-8"))
-        print("QQ最近列表：")
-        print(j_data)
-        if "errmsg" in j_data.keys():
-            print(j_data)
+        try:
+            j_data = json.loads(self._session.post(url=url, data=r_data).content.decode("utf-8"))
+            if "errmsg" in j_data.keys():
+                print(j_data)
+                return None
+            print("QQ附近列表：%s" % j_data["result"])
+            return j_data["result"]
+        except:
             return None
-        return j_data["result"]
 
     def _send_qun_msg(self,group_uin,msg):
         '''
@@ -296,6 +314,9 @@ class SmartQQ():
             return False
 
     def _get_self_img(self):
+        '''
+        # 获取自己的头像
+        '''
         # self._headers["Accept"] = "image/webp,image/*,*/*;q=0.8"
         # self._headers["Host"] = "q.qlogo.cn"
         # self._headers["Referer"] = "http://w.qq.com/"

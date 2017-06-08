@@ -2,6 +2,7 @@ __author__ = 'lius'
 
 from smartqq import SmartQQ
 from gui import Window
+import gui
 import os
 import time
 import messge_text
@@ -13,10 +14,10 @@ def robot():
     # 简单回复机器人实现
     '''
     qq = SmartQQ()
-    w = Window()
+    w = Window(qq)
     qq._login() # 登录验证
     dat = qq._get_self_info() # 获取个人信息，主要是获取gid,发送信息会用到。
-    fris = qq._get_friends_info() # 获取好友列表
+    friends = qq._get_friends_info() # 获取好友列表
     onli = qq._get_online_buddies2() # 获取在线好友
     rev = qq._get_recent_list2() # 获取最近列表
     groups = qq._get_group_info() # 获取群列表
@@ -25,10 +26,12 @@ def robot():
 
     w.show_self_info(img=img, data=dat) # 显示个人信息
 
+    gui.groups = groups
+    gui.friends = friends
+
     # 设置想监控的群列表
-    for g in groups:
-        if g['name'] == "有你有我":
-            robot_group_uin = g['gid']
+    if '有你有我' in groups.keys():
+            robot_group_uin = groups['有你有我']['gid']
     if robot_group_uin == 0:
         print("没有监控的群列表,程序退出.")
         os._exit(0)
@@ -49,7 +52,7 @@ def robot():
                     print("机器人回复 : %s" % msg)
             time.sleep(1)
 
-    t = threading.Thread(target=recv_func)
+    t = threading.Thread(target=recv_func)#, args=({'friends':friends, 'groups':groups}),)
     t.start()
 
     w.run()

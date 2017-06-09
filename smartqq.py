@@ -33,6 +33,10 @@ class SmartQQ():
             root.title("扫描二维码")
             root.geometry('200x150') #设置窗口大小
             root.resizable(width=False, height=False) #窗口大小不可变
+
+            size = '%dx%d+%d+%d' % (200, 150, (root.winfo_screenwidth() - 200) / 2, (root.winfo_screenheight() - 150) / 2)
+            root.geometry(size)
+
             img = tkinter.PhotoImage(data=content)
             label = tkinter.Label(root, image=img)
             label.pack()
@@ -226,16 +230,34 @@ class SmartQQ():
                 return None
             if "result" in j_data.keys():
                 content = self._recur_list(j_data["result"][0]["value"]["content"][1:])
-                return {"poll_type": j_data["result"][0]["poll_type"],
+                data = {"poll_type": j_data["result"][0]["poll_type"],
                         "from_uin": j_data["result"][0]["value"]["from_uin"],
-                        "content": content
+                        "content": content,
                         }
-            return j_data
+                if data["poll_type"] == "group_message":
+                    data["send_uin"] = j_data["result"][0]["value"]["send_uin"]
+                else:
+                    data["send_uin"] = None
+                return data
+            return None
         except:
             print('Fetch message exception!')
             return None
-        # {"result":[{"poll_type":"group_message","value":{"content":[["font",{"color":"000000","name":"微软雅黑","size":10,"style":[0,0,0]}],"好"],"from_uin":2324333159,"group_code":2324333159,"msg_id":18317,"msg_type":4,"send_uin":1550070579,"time":1496933934,"to_uin":979885605}}],"retcode":0}
-        # {"result":[{"poll_type":"message","value":{"content":[["font",{"color":"000000","name":"微软雅黑","size":10,"style":[0,0,0]}],"哈哈哈哈"],"from_uin":1550070579,"msg_id":18321,"msg_type":1,"time":1496934177,"to_uin":979885605}}],"retcode":0}
+        # {"result":[{"poll_type":"group_message",
+            # "value":{
+            # "content":[["font",{"color":"000000","name":"微软雅黑","size":10,"style":[0,0,0]}],"好"],
+            # "from_uin":2324333159,
+            # "group_code":2324333159,
+            # "msg_id":18317,"msg_type":4,
+            # "send_uin":1550070579,"time":1496933934,"to_uin":979885605}}],"retcode":0}
+        # {"result":[{"poll_type":"message",
+            # "value":{
+            # "content":[["font",{"color":"000000","name":"微软雅黑","size":10,"style":[0,0,0]}],"哈哈哈哈"],
+            # "from_uin":1550070579,
+            # "msg_id":18321,
+            # "msg_type":1,
+            # "time":1496934177,
+            # "to_uin":979885605}}],"retcode":0}
 
     def _get_online_buddies2(self):
         '''
@@ -270,7 +292,7 @@ class SmartQQ():
             if "errmsg" in j_data.keys():
                 print(j_data)
                 return None
-            print("QQ附近列表：%s" % j_data["result"])
+            print("QQ最近列表：%s" % j_data["result"])
             return j_data["result"]
         except:
             return None

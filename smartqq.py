@@ -19,7 +19,7 @@ class SmartQQ():
         self._ptwebqq = ""
         self._vfwebqq = ""
         self._psessionid = ""
-        self._uin = ""
+        self._uin = 0
         self._face = 0
         self._qqnum = 0
         self._qqname = ''
@@ -344,9 +344,24 @@ class SmartQQ():
         # self._headers["Accept"] = "image/webp,image/*,*/*;q=0.8"
         # self._headers["Host"] = "q.qlogo.cn"
         # self._headers["Referer"] = "http://w.qq.com/"
-        self._session.headers.update(self._headers)
+        # self._session.headers.update(self._headers)
         url = 'http://q.qlogo.cn/g?b=qq&nk='+ str(self._uin) +'&s=100&t=149673935' + str(random.randint(1000, 10000))
-        content = self._session.get(url=url).content
-        print(content)
-        return content
+        try:
+            content = self._session.get(url=url).content
+            print(content)
+            return content
+        except:
+            return None
 
+    def get_group_info(self,gcode):
+        '''
+        # 获取群资料
+        '''
+        url = 'http://s.web2.qq.com/api/get_group_info_ext2?gcode=' + str(gcode) + '&vfwebqq='+ str(self._vfwebqq) +'&t=149708885' + str(random.randint(1000, 10000))
+        try:
+            j_data = json.loads(self._session.get(url=url).content.decode("utf-8"))
+            print("群成员信息：%s" % j_data['result']['minfo'])
+            return j_data['result']['minfo']
+        except:
+            print("获取群资料异常.")
+            return None

@@ -97,11 +97,10 @@ class Window():
         rc_check.grid(column=0, row=1, sticky=W)
 
         # 刷新按键
-        Button(self.ref_cho, text="好友列表", bd=2, command=lambda : 1, width=8).grid( row=0, column=0, pady=2, padx=9)
-        Button(self.ref_cho, text="群列表", bd=2, command=lambda : 1, width=8).grid( row=0, column=1, pady=2, padx=1)
-        Button(self.ref_cho, text="群聊列表", bd=2, command=lambda : 1, width=8, state='disabled').grid( row=1, column=0, pady=2, padx=9)
-        Button(self.ref_cho, text="个人信息", bd=2, command=lambda : 1, width=8).grid( row=1, column=1, pady=2, padx=1)
-
+        Button(self.ref_cho, text="好友列表", bd=2, command=self.refresh_friends_list, width=8).grid( row=0, column=0, pady=2, padx=9)
+        Button(self.ref_cho, text="群列表", bd=2, command=self.refresh_groups_list, width=8).grid( row=0, column=1, pady=2, padx=1)
+        Button(self.ref_cho, text="群聊列表", bd=2, command=self.refresh_group_chat_list, width=8, state='disabled').grid( row=1, column=0, pady=2, padx=9)
+        Button(self.ref_cho, text="个人信息", bd=2, command=self.refresh_self_info_list, width=8).grid( row=1, column=1, pady=2, padx=1)
 
         # 读取文件选项
         self.path_file_1 = StringVar()
@@ -155,10 +154,31 @@ class Window():
         Label(self.frame_right_2, textvariable=self.face_label_text, relief="solid", borderwidth=1, width=16, height=1).grid(row=9, column=1, pady=2)
         self.frame_right_2.grid_propagate(0)
 
+    # 刷新好友列表
+    def refresh_friends_list(self):
+        global friends
+        friends = self.smartqq._get_friends_info()
+        self.flb_radCall()
+        print("刷新好友列表成功.")
+    # 刷新群列表
+    def refresh_groups_list(self):
+        global groups
+        groups = self.smartqq._get_group_info()
+        self.flb_radCall()
+        print("刷新群列表成功.")
+    # 刷新群聊列表
+    def refresh_group_chat_list(self):
+        pass
+    # 刷新个人资料
+    def refresh_self_info_list(self):
+        info = self.smartqq._get_self_info()
+        print("刷新个人资料成功.")
+        self.show_self_info(data=info)
+
     # 选择加载文件
     def select_path_file(self, pf):
         # path_ = askdirectory()
-        path_ = filedialog.askopenfilename(title='打开文件', filetypes=[('Python', '*.py *.pyw'), ('All Files', '*')])
+        path_ = filedialog.askopenfilename(title='打开文件', filetypes=[('All Files', '*')])
         pf.set(path_)
 
     # 设置界面屏幕居中显示
@@ -174,10 +194,10 @@ class Window():
         radSel = self.flb_radVar.get()
         if radSel == 0:
             self.flb_pull_down_combobox['values'] = tuple(friends.keys())  # 设置下拉列表的值
-            print(self.flb_radVar.get())
+            print("切换为好友列表.")
         elif radSel == 1:
             self.flb_pull_down_combobox['values'] = tuple(groups.keys())  # 设置下拉列表的值
-            print(self.flb_radVar.get())
+            print("切换为群列表.")
         self.flb_pull_down_combobox.set('请选择')
 
     # 显示消息事件
@@ -229,22 +249,23 @@ class Window():
     # 显示个人信息
     def show_self_info(self, img=None, data=None):
         # 文件夹检测
-        if not os.path.isdir('temp'):
-            os.mkdir('temp')
-        # 保存图片
-        with open('./temp/my.png', "w+b") as code:
-            code.write(img)
-        # 读取图片
-        try:
-            bm = PhotoImage(file="./temp/my.png")
-            self.img_label.configure(image=bm)
-            self.img_label.bm = bm
-        except:
-            pass
-        # 删除图片
-        if os.path.isfile('./temp/my.png'):
-            os.remove("./temp/my.png")
-        # 将显示信息填入label
+        if img != None:
+            if not os.path.isdir('temp'):
+                os.mkdir('temp')
+            # 保存图片
+            with open('./temp/my.png', "w+b") as code:
+                code.write(img)
+            # 读取图片
+            try:
+                bm = PhotoImage(file="./temp/my.png")
+                self.img_label.configure(image=bm)
+                self.img_label.bm = bm
+            except:
+                pass
+            # 删除图片
+            if os.path.isfile('./temp/my.png'):
+                os.remove("./temp/my.png")
+            # 将显示信息填入label
         if data != None:
             self.name_label_text.set(data['nick'])
             self.qq_label_text.set(str(data['account']))

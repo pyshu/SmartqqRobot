@@ -174,7 +174,7 @@ class SmartQQ():
             j_data = json.loads(self._session.get(url=url).content.decode("utf-8"))
             self._face = j_data["result"]["face"]
             self._qqname = j_data["result"]["nick"]
-            # self._qqnum = j_data["result"]["account"]
+            self._qqaccount = j_data["result"]["account"]
             print("我的QQ资料：%s" % j_data["result"])
             return j_data["result"]
         except:
@@ -361,7 +361,7 @@ class SmartQQ():
         try:
             j_data = json.loads(self._session.get(url=url).content.decode("utf-8"))
             print("群成员信息：%s" % j_data['result']['minfo'])
-            return j_data['result']['minfo']
+            return {"ginfo":{"name":j_data['result']['ginfo']['name'],"gid":j_data['result']['ginfo']['gid']},"minfo":j_data['result']['minfo']}
         except:
             print("获取群资料异常.")
             return None

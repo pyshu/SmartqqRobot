@@ -188,6 +188,15 @@ class Window():
         size = '%dx%d+%d+%d' % (width, height, (screenwidth - width) / 2, (screenheight - height) / 2)
         self.root.geometry(size)
 
+    def group_information_handle(self, from_group_uin, group_sender_uin):
+        group_info = self.smartqq.get_group_info(from_group_uin)
+        if group_info != None:
+            for info in group_info['minfo']:
+                if info['uin'] == group_sender_uin:
+                    return {"g_name":group_info["ginfo"]["name"],"s_name":info["nick"]}
+            return {"g_name":group_info["ginfo"]["name"]}
+
+
     # 单选按钮回调函数,就是当单选按钮被点击会执行该函数
     def flb_radCall(self):
         self.button_sendmsg['state'] = 'normal'  # 将发送按钮设置为 活动状态
@@ -201,50 +210,43 @@ class Window():
         self.flb_pull_down_combobox.set('请选择')
 
     # 显示消息事件
-    def show_message(self,data=None):
-        msg = self.text_msgsend.get('0.0', END)
-        if msg != '\n' or data != None:
-            # 在聊天内容上方加一行 显示发送人及发送时间
-            date = ':' + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + '\n'
-            msgcontent = '发送 到'
-            if data != None: # 接收消息显示处理
-                # 群消息处理 if
-                if data['poll_type'] == "group_message" and self.rg_chVar.get() == 1:
-                    # 查找dict中好友昵称，如没有即为自己发送出去的。
-                    for v in friends.values():
-                        if v['uin'] == data['send_uin']:
-                            msgcontent = '来自 ' + v['nick']
-                            break
-                    # 查找dict中群名称
-                    for v in groups.values():
-                        if v['gid'] == data['from_uin']:
-                            msgcontent = msgcontent + ' ( '+ v['name'] + ' (群))' + date
-                            break
-                    self.text_msglist.insert(END, msgcontent, 'green')
-                    self.text_msglist.insert(END, data['content'] + '\n')
-                # 好友消息处理 if
-                if data['poll_type'] == "message" and self.rf_chVar.get() == 1:
-                    # 查找dict中好友昵称
-                    for v in friends.values():
-                        if v['uin'] == data['from_uin']:
-                            msgcontent = '来自 '+ v['nick'] + '(好友)' + date
-                            break
-                    self.text_msglist.insert(END, msgcontent, 'green')
-                    self.text_msglist.insert(END, data['content'] + '\n')
-            else:  # 发送消息显示处理
-                usr = self.flb_pull_down_combobox.get()
+    def show_message(self, data=None):
+        # 在聊天内容上方加一行 显示发送人及发送时间
+        date = ':' + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + '\n'
+        msgcontent = '消息出错 '
+        if data != None:  # 接收消息显示处理
+            # 群消息处理 if
+            if data['poll_type'] == "group_message" and self.rg_chVar.get() == 1:
+                info = self.group_information_handle(data['from_uin'], data['send_uin'])
+                if "s_name" in info.keys():
+                    msgcontent = '来自 ' + info['s_name'] + ' ( ' + info['g_name'] + ' (群))' + date
+                else:
+                    msgcontent = '发送 到 ' + info['g_name'] + '(群)' + date
+            # 好友消息处理 if
+            if data['poll_type'] == "message" and self.rf_chVar.get() == 1:
+                # 查找dict中好友昵称
+                for v in friends.values():
+                    if v['uin'] == data['from_uin']:
+                        msgcontent = '来自 ' + v['nick'] + '(好友)' + date
+                        break
+            self.text_msglist.insert(END, msgcontent, 'green')
+            self.text_msglist.insert(END, data['content'] + '\n')
+        else:  # 发送消息显示处理
+            msg = self.text_msgsend.get('0.0', END)
+            usr = self.flb_pull_down_combobox.get()
+            if msg != '\n' and usr != '请选择':
                 status = self.flb_radVar.get()
                 if status == 0:
-                    msgcontent = '发送 '+ str(usr) + '(好友)' + date
+                    msgcontent = '发送 到 ' + str(usr) + '(好友)' + date
                     self.smartqq._send_buddy_msg(friends[usr]['uin'], msg[:-1])
                 if status == 1:
-                    # msgcontent = '发送 '+ str(usr) + '(群)' + date
+                    # msgcontent = '发送 到 '+ str(usr) + '(群)' + date
                     self.smartqq._send_qun_msg(groups[usr]['gid'], msg[:-1])
                     return
                 self.text_msglist.insert(END, msgcontent, 'green')
                 self.text_msglist.insert(END, msg)
-            self.text_msgsend.delete('0.0', END)
-            self.text_msglist.see(END)
+                self.text_msgsend.delete('0.0', END)
+        self.text_msglist.see(END)
 
     # 显示个人信息
     def show_self_info(self, img=None, data=None):

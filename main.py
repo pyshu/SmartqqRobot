@@ -11,7 +11,7 @@ import threading
 
 def robot():
     '''
-    # 简单回复机器人实现
+    # 简单机器人实现
     '''
     qq = SmartQQ()
     w = Window(qq)
@@ -28,13 +28,6 @@ def robot():
 
     gui.groups = groups
     gui.friends = friends
-
-    # 设置想监控的群列表
-    if '有你有我' in groups.keys():
-            robot_group_uin = groups['有你有我']['gid']
-    if robot_group_uin == 0:
-        print("没有监控的群列表,程序退出.")
-        os._exit(0)
 
     # 循环主题
     def recv_func():
@@ -53,7 +46,7 @@ def robot():
                     print("机器人回复 : %s" % msg)
             time.sleep(1)
 
-    t = threading.Thread(target=recv_func)#, args=({'friends':friends, 'groups':groups}),)
+    t = threading.Thread(target=recv_func)
     t.start()
 
     w.run()

@@ -11,6 +11,7 @@ import os
 
 groups = {}
 friends = {}
+auto_send_name = {"friend":None, "group":None, "gchat":None}
 
 class Window():
     def __init__(self,qq=None):
@@ -18,19 +19,18 @@ class Window():
         self.root = Tk()
         self.root.title("QQ机器人")
         self.root.resizable(width=False, height=False)  # 窗口大小不可变
-        self.center_window(755, 425) # 窗口居中显示
+        self.center_window(796, 425) # 窗口居中显示
 
         # 左侧消息栏
-        self.frame_left_top = LabelFrame(self.root, width=380, height=270, text=" 消息显示 ")
-        self.frame_left_center = LabelFrame(self.root, width=380, height=100, text=" 编辑消息 ")
-        self.frame_left_bottom = Frame(width=380, height=30)
+        self.frame_left_top = LabelFrame(self.root, width=422, height=270, text=" 消息显示 ")
+        self.frame_left_center = LabelFrame(self.root, width=422, height=100, text=" 编辑消息 ")
+        self.frame_left_bottom = Frame(width=420, height=30)
         self.frame_left_top.grid_propagate(0)
         self.frame_left_center.grid_propagate(0)
         self.frame_left_bottom.grid_propagate(0)
 
-        self.text_msglist = ScrolledText(self.frame_left_top, width=51, height=19, borderwidth = 0, state = 'normal',wrap=WORD)
-        self.text_msgsend = ScrolledText(self.frame_left_center, width=51,height=6,borderwidth = 0)
-        self.button_sendmsg = Button(self.frame_left_bottom, text='发送', command=self.show_message, width=6, state='disabled')
+        self.text_msglist = ScrolledText(self.frame_left_top, width=57, height=19, borderwidth = 0, state = 'normal',wrap=WORD)
+        self.text_msgsend = ScrolledText(self.frame_left_center, width=57,height=6,borderwidth = 0)
         # 创建绿色的tag
         self.text_msglist.tag_config('green', foreground='#008B00')
 
@@ -57,50 +57,89 @@ class Window():
         self.flb_pull_down_combobox.grid(column=4, row=0)  # 设置其在界面中出现的位置  column代表列   row 代表行
         self.flb_pull_down_combobox.current(0)  # 设置下拉列表默认显示的值，0为 numberChosen['values'] 的下标值
 
+        self.button_sendmsg = Button(self.frame_left_bottom, text='发送', command=self.show_message, width=5, state='disabled')
+        self.button_send_mode = Button(self.frame_left_bottom, text='多窗口', command=lambda :  1, width=5, state='disabled')
+
         # 把元素填充进去
         self.text_msglist.grid()
         self.text_msgsend.grid()
-        self.button_sendmsg.grid(column=5, row=0, padx=2, sticky=W)
         self.text_msglist.grid()
+        self.button_sendmsg.grid(column=5, row=0, padx=1, sticky=W)
+        self.button_send_mode.grid(column=6, row=0, padx=1, sticky=W)
 
         # 中间配置栏
         self.frame_right_1 = LabelFrame(self.root, width=170, height=400, text=" ROBOT配置 ")
         self.frame_right_1.grid(row=0, column=1, rowspan=3, padx=4, pady=5, ipadx=2, ipady=5)
         self.frame_right_1.grid_propagate(0)
 
-        self.recv_cho = LabelFrame(self.frame_right_1, width=160, height=70,text=" 接收 ")
-        self.recv_cho.grid(row=0, column=0,padx=4, pady=5, ipadx=2, ipady=5)
+        self.recv_cho = LabelFrame(self.frame_right_1, width=160, height=45,text=" 接收 ")
+        self.recv_cho.grid(row=0, column=0,padx=4, pady=1, ipadx=2, ipady=3)
         self.recv_cho.grid_propagate(0)
 
         self.ref_cho = LabelFrame(self.frame_right_1, width=160, height=85, text=" 刷新 ")
-        self.ref_cho.grid(row=1, column=0, padx=4, pady=5, ipadx=2, ipady=5)
+        self.ref_cho.grid(row=1, column=0, padx=4, pady=1, ipadx=2, ipady=3)
         self.ref_cho.grid_propagate(0)
 
-        self.com_cho = LabelFrame(self.frame_right_1, width=160, height=175, text=" 综合 ")
-        self.com_cho.grid(row=2, column=0, padx=4, pady=5, ipadx=2, ipady=5)
+        self.robot_cho = LabelFrame(self.frame_right_1, width=160, height=110, text=" 监控 ")
+        self.robot_cho.grid(row=2, column=0, padx=4, pady=1, ipadx=2, ipady=3)
+        self.robot_cho.grid_propagate(0)
+
+        self.com_cho = LabelFrame(self.frame_right_1, width=160, height=115, text=" 自定义回复 ")
+        self.com_cho.grid(row=3, column=0, padx=4, pady=1, ipadx=2, ipady=3)
         self.com_cho.grid_propagate(0)
 
         # 复选框
         self.rg_chVar = IntVar()  # 用来获取复选框是否被勾选，通过chVarDis.get()来获取其的状态,其状态值为int类型 勾选为1  未勾选为0
-        rg_check = Checkbutton(self.recv_cho, text="群消息", variable=self.rg_chVar)#, state='disabled')  # text为该复选框后面显示的名称, variable将该复选框的状态赋值给一个变量，当state='disabled'时，该复选框为灰色，不能点的状态
+        rg_check = Checkbutton(self.recv_cho, text="群", variable=self.rg_chVar)#, state='disabled')  # text为该复选框后面显示的名称, variable将该复选框的状态赋值给一个变量，当state='disabled'时，该复选框为灰色，不能点的状态
         rg_check.select()  # 该复选框是否勾选,select为勾选, deselect为不勾选
-        rg_check.grid(column=1, row=0, sticky=W)
+        rg_check.grid(column=1, row=0, padx=3, sticky=W)
 
         self.rf_chVar = IntVar()
-        rf_check = Checkbutton(self.recv_cho, text="好友消息", variable=self.rf_chVar)  # , state='disabled')
+        rf_check = Checkbutton(self.recv_cho, text="好友", variable=self.rf_chVar)  # , state='disabled')
         rf_check.select()  # 该复选框是否勾选,select为勾选, deselect为不勾选
-        rf_check.grid(column=0, row=0, sticky=W)
+        rf_check.grid(column=0, row=0, padx=3, sticky=W)
 
         self.rc_chVar = IntVar()
-        rc_check = Checkbutton(self.recv_cho, text="群聊消息", variable=self.rc_chVar, state='disabled')
+        rc_check = Checkbutton(self.recv_cho, text="群聊", variable=self.rc_chVar, state='disabled')
         rc_check.deselect()  # 该复选框是否勾选,select为勾选, deselect为不勾选
-        rc_check.grid(column=0, row=1, sticky=W)
+        rc_check.grid(column=2, row=0, padx=3, sticky=W)
 
         # 刷新按键
         Button(self.ref_cho, text="好友列表", bd=2, command=self.refresh_friends_list, width=8).grid( row=0, column=0, pady=2, padx=9)
         Button(self.ref_cho, text="群列表", bd=2, command=self.refresh_groups_list, width=8).grid( row=0, column=1, pady=2, padx=1)
         Button(self.ref_cho, text="群聊列表", bd=2, command=self.refresh_group_chat_list, width=8, state='disabled').grid( row=1, column=0, pady=2, padx=9)
         Button(self.ref_cho, text="个人信息", bd=2, command=self.refresh_self_info_list, width=8).grid( row=1, column=1, pady=2, padx=1)
+
+        # robot 监控设置
+        Label(self.robot_cho, text="好友:").grid(row=0, column=0, pady=2)
+        # 下拉列表
+        self.rbt_pull_down_number_friend = StringVar()
+        self.rbt_pull_down_combobox_friend = ttk.Combobox(self.robot_cho, width=10, height=3, textvariable=self.rbt_pull_down_number_friend, state='readonly')
+        self.rbt_pull_down_combobox_friend['values'] = ("*请选择*","*回复所有*")  # 设置下拉列表的值
+        self.rbt_pull_down_combobox_friend.grid(column=1, row=0)  # 设置其在界面中出现的位置  column代表列   row 代表行
+        self.rbt_pull_down_combobox_friend.current(0)  # 设置下拉列表默认显示的值，0为 numberChosen['values'] 的下标值
+        self.rbt_btn_friend = Button(self.robot_cho, text='OK', command=self.rbt_friend_call, width=3, state='disabled')
+        self.rbt_btn_friend.grid(column=2, row=0, padx=1, sticky=W)
+
+        Label(self.robot_cho, text=" 群: ").grid(row=1, column=0, pady=2)
+        # 下拉列表
+        self.rbt_pull_down_number_group = StringVar()
+        self.rbt_pull_down_combobox_group = ttk.Combobox(self.robot_cho, width=10, height=3,textvariable=self.rbt_pull_down_number_group,state='readonly')
+        self.rbt_pull_down_combobox_group['values'] = ("*请选择*","*回复所有*")  # 设置下拉列表的值
+        self.rbt_pull_down_combobox_group.grid(column=1, row=1)  # 设置其在界面中出现的位置  column代表列   row 代表行
+        self.rbt_pull_down_combobox_group.current(0)  # 设置下拉列表默认显示的值，0为 numberChosen['values'] 的下标值
+        self.rbt_btn_group = Button(self.robot_cho, text='OK', command=self.rbt_group_call, width=3 , state='disabled')
+        self.rbt_btn_group.grid(column=2, row=1, padx=1, sticky=W)
+
+        Label(self.robot_cho, text="群聊:").grid(row=2, column=0, pady=2)
+        # 下拉列表
+        self.rbt_pull_down_number_gchat = StringVar()
+        self.rbt_pull_down_combobox_gchat = ttk.Combobox(self.robot_cho, width=10, height=3, textvariable=self.rbt_pull_down_number_gchat, state='disabled')#, state='readonly')
+        self.rbt_pull_down_combobox_gchat['values'] = ("请选择")  # 设置下拉列表的值
+        self.rbt_pull_down_combobox_gchat.grid(column=1, row=2)  # 设置其在界面中出现的位置  column代表列   row 代表行
+        self.rbt_pull_down_combobox_gchat.current(0)  # 设置下拉列表默认显示的值，0为 numberChosen['values'] 的下标值
+        self.rbt_btn_gchat = Button(self.robot_cho, text='OK', command=lambda : 1, width=3, state='disabled')
+        self.rbt_btn_gchat.grid(column=2, row=2, padx=1, sticky=W)
 
         # 读取文件选项
         self.path_file_1 = StringVar()
@@ -154,6 +193,13 @@ class Window():
         Label(self.frame_right_2, textvariable=self.face_label_text, relief="solid", borderwidth=1, width=16, height=1).grid(row=9, column=1, pady=2)
         self.frame_right_2.grid_propagate(0)
 
+    # 机器人回复列表
+    def rbt_friend_call(self):
+        auto_send_name["friend"] = self.rbt_pull_down_combobox_friend.get()
+
+    def rbt_group_call(self):
+        auto_send_name["group"] = self.rbt_pull_down_combobox_group.get()
+
     # 刷新好友列表
     def refresh_friends_list(self):
         global friends
@@ -169,6 +215,7 @@ class Window():
     # 刷新群聊列表
     def refresh_group_chat_list(self):
         pass
+
     # 刷新个人资料
     def refresh_self_info_list(self):
         info = self.smartqq._get_self_info()
@@ -200,17 +247,23 @@ class Window():
     # 单选按钮回调函数,就是当单选按钮被点击会执行该函数
     def flb_radCall(self):
         self.button_sendmsg['state'] = 'normal'  # 将发送按钮设置为 活动状态
+        self.rbt_btn_friend['state'] = 'normal'
+        self.rbt_btn_group['state'] = 'normal'
         radSel = self.flb_radVar.get()
         if radSel == 0:
-            self.flb_pull_down_combobox['values'] = tuple(friends.keys())  # 设置下拉列表的值
+            lst = friends.keys()
+            self.flb_pull_down_combobox['values'] = tuple(lst)  # 设置下拉列表的值
+            self.rbt_pull_down_combobox_friend['values'] = tuple(lst.insert(0, '*回复所有*'))
             print("切换为好友列表.")
         elif radSel == 1:
-            self.flb_pull_down_combobox['values'] = tuple(groups.keys())  # 设置下拉列表的值
+            lst = groups.keys()
+            self.flb_pull_down_combobox['values'] = tuple(lst)  # 设置下拉列表的值
+            self.rbt_pull_down_combobox_group['values'] = tuple(lst.insert(0, '*回复所有*'))
             print("切换为群列表.")
         self.flb_pull_down_combobox.set('请选择')
 
     # 显示消息事件
-    def show_message(self, data=None):
+    def show_message(self, data=None, flag=None):
         # 在聊天内容上方加一行 显示发送人及发送时间
         date = ':' + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + '\n'
         msgcontent = '消息出错 '
@@ -232,8 +285,14 @@ class Window():
             self.text_msglist.insert(END, msgcontent, 'green')
             self.text_msglist.insert(END, data['content'] + '\n')
         else:  # 发送消息显示处理
-            msg = self.text_msgsend.get('0.0', END)
-            usr = self.flb_pull_down_combobox.get()
+            if flag == None:
+                msg = self.text_msgsend.get('0.0', END)
+                usr = self.flb_pull_down_combobox.get()
+                status = self.flb_radVar.get()
+            else:
+                msg = self.text_msgsend.get('0.0', END)
+                usr = self.flb_pull_down_combobox.get()
+                status = self.flb_radVar.get()
             if msg != '\n' and usr != '请选择':
                 status = self.flb_radVar.get()
                 if status == 0:

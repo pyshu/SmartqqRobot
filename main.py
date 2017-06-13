@@ -36,7 +36,7 @@ def robot():
             if get_msg != None:
                 print(get_msg)
                 w.show_message(get_msg)
-            if get_msg != None and get_msg["poll_type"] == "group_message" and get_msg["from_uin"] == robot_group_uin:
+            if get_msg != None and get_msg["poll_type"] == "group_message" and get_msg["from_uin"] == gui.auto_send_name['group']:
                 if get_msg["content"].find("@时光1号") >= 0:
                     if get_msg["content"].find("自动回复") >= 0:
                         msg = messge_text.messge_re[random.randint(0, 53)]
@@ -44,6 +44,15 @@ def robot():
                         msg = "我不明白你的意思."
                     qq._send_qun_msg(robot_group_uin, msg)
                     print("机器人回复 : %s" % msg)
+            if get_msg != None and get_msg["poll_type"] == "message" and get_msg["from_uin"] == gui.auto_send_name['friend']:
+                if get_msg["content"].find("@时光1号") >= 0:
+                    if get_msg["content"].find("自动回复") >= 0:
+                        msg = messge_text.messge_re[random.randint(0, 53)]
+                    else:
+                        msg = "我不明白你的意思."
+                    qq._send_qun_msg(robot_group_uin, msg)
+                    print("机器人回复 : %s" % msg)
+
             time.sleep(1)
 
     t = threading.Thread(target=recv_func)

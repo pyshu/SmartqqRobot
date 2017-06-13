@@ -344,7 +344,7 @@ class SmartQQ():
         # self._headers["Accept"] = "image/webp,image/*,*/*;q=0.8"
         # self._headers["Host"] = "q.qlogo.cn"
         # self._headers["Referer"] = "http://w.qq.com/"
-        # self._session.headers.update(self._headers)
+        self._session.headers.update(self._headers)
         url = 'http://q.qlogo.cn/g?b=qq&nk='+ str(self._uin) +'&s=100&t=149673935' + str(random.randint(1000, 10000))
         try:
             content = self._session.get(url=url).content
@@ -357,11 +357,18 @@ class SmartQQ():
         '''
         # 获取群资料
         '''
-        url = 'http://s.web2.qq.com/api/get_group_info_ext2?gcode=' + str(gcode) + '&vfwebqq='+ str(self._vfwebqq) +'&t=149708885' + str(random.randint(1000, 10000))
+        # self._headers["Host"] = "s.web2.qq.com"
+        # self._headers["Referer"] = "http://s.web2.qq.com/proxy.html?v=20130916001&callback =1&id=1"
+        self._session.headers.update(self._headers)
+        url = 'http://s.web2.qq.com/api/get_group_info_ext2?gcode=' + str(gcode) + '&vfwebqq='+ str(self._vfwebqq) +'&t=149734532' + str(random.randint(1000, 10000))
         try:
             j_data = json.loads(self._session.get(url=url).content.decode("utf-8"))
-            print("群成员信息：%s" % j_data['result']['minfo'])
-            return {"ginfo":{"name":j_data['result']['ginfo']['name'],"gid":j_data['result']['ginfo']['gid']},"minfo":j_data['result']['minfo']}
+            if "result" in j_data.keys():
+                print("群成员信息：%s" % j_data['result']['minfo'])
+                return {"ginfo":{"name":j_data['result']['ginfo']['name'],"gid":j_data['result']['ginfo']['gid']},"minfo":j_data['result']['minfo']}
+            else:
+                print("未获取到群资料. %s" % j_data)
+                return None
         except:
             print("获取群资料异常.")
             return None

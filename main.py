@@ -33,24 +33,24 @@ def robot():
     def recv_func():
         while 1:
             get_msg = qq._get_chat_msg()
+            print("get_msg %s" % get_msg)
             if get_msg != None:
-                print(get_msg)
-                w.show_message(get_msg)
-            if get_msg != None and get_msg["poll_type"] == "group_message" and get_msg["from_uin"] == gui.auto_send_name['group']:
-                if get_msg["content"].find("@时光1号") >= 0:
-                    if get_msg["content"].find("自动回复") >= 0:
+                if get_msg["poll_type"] == "group_message":
+                    w.group_msg_handle(get_msg["from_uin"], get_msg["send_uin"], get_msg["content"])
+                    if get_msg["content"].find("@时光") >= 0 and get_msg["from_uin"] == gui.auto_send_name['group']:
+                        if get_msg["content"].find("自动回复") >= 0:
+                            msg = messge_text.messge_re[random.randint(0, 53)]
+                        else:
+                            msg = "我不明白你的意思."
+                        qq._send_qun_msg(groups[gui.auto_send_name['group']]['gid'], msg)
+                        print("机器人回复 : %s" % msg)
+                if get_msg["poll_type"] == "message":
+                    w.friend_msg_handle(get_msg["from_uin"], get_msg["content"])
+                    if get_msg["content"].find("自动回复") >= 0 and get_msg["from_uin"] == gui.auto_send_name['friend']:
                         msg = messge_text.messge_re[random.randint(0, 53)]
                     else:
                         msg = "我不明白你的意思."
-                    qq._send_qun_msg(robot_group_uin, msg)
-                    print("机器人回复 : %s" % msg)
-            if get_msg != None and get_msg["poll_type"] == "message" and get_msg["from_uin"] == gui.auto_send_name['friend']:
-                if get_msg["content"].find("@时光1号") >= 0:
-                    if get_msg["content"].find("自动回复") >= 0:
-                        msg = messge_text.messge_re[random.randint(0, 53)]
-                    else:
-                        msg = "我不明白你的意思."
-                    qq._send_qun_msg(robot_group_uin, msg)
+                    qq._send_buddy_msg(friends[gui.auto_send_name['friend']]['uin'], msg)
                     print("机器人回复 : %s" % msg)
 
             time.sleep(1)

@@ -20,34 +20,34 @@ class Window():
         self.root = Tk()
         self.root.title("QQ机器人")
         self.root.resizable(width=False, height=False)  # 窗口大小不可变
-        self.center_window(796, 460) # 窗口居中显示
+        self.center_window(796, 480) # 窗口居中显示
 
         # 左侧消息栏
-        self.frame_left_top = LabelFrame(self.root, width=422, height=270, text=" 消息显示 ")
-        self.frame_left_center_top = Frame(width=422, height=30)
+        self.frame_left_top = LabelFrame(self.root, width=422, height=320, text=" 消息显示 ")
+        # self.frame_left_center_top = Frame(width=422, height=30)
         self.frame_left_center_bottom = LabelFrame(self.root, width=422, height=100, text=" 编辑消息 ")
         self.frame_left_bottom = Frame(width=422, height=30)
 
         self.frame_left_top.grid_propagate(0)
-        self.frame_left_center_top.grid_propagate(0)
+        # self.frame_left_center_top.grid_propagate(0)
         self.frame_left_center_bottom.grid_propagate(0)
         self.frame_left_bottom.grid_propagate(0)
 
         self.frame_left_top.grid(row=0, column=0, rowspan=1, padx=5, pady=0)
-        self.frame_left_center_top.grid(row=1, column=0, pady=0, padx=0,)
+        # self.frame_left_center_top.grid(row=1, column=0, pady=0, padx=0,)
         self.frame_left_center_bottom.grid(row=2, column=0, rowspan=1, padx=2, pady=0)
         self.frame_left_bottom.grid(row=3, column=0, pady=1)
 
-        self.text_msglist = ScrolledText(self.frame_left_top, width=57, height=19, borderwidth = 0, state = 'normal',wrap=WORD)
+        self.text_msglist = ScrolledText(self.frame_left_top, width=57, height=23, borderwidth = 0, state = 'normal',wrap=WORD)
         self.text_msgsend = ScrolledText(self.frame_left_center_bottom, width=57,height=6,borderwidth = 0)
         # 创建绿色的tag
         self.text_msglist.tag_config('green', foreground='#008B00')
 
-        Label(self.frame_left_center_top, text="").grid(row=0, column=0, ipadx=157, pady=0)
-        self.button_clear_message = Button(self.frame_left_center_top, text='清屏', command=lambda : self.text_msglist.delete(0.0, END), width=5, height=1)#, state='disabled')
-        self.button_save_message = Button(self.frame_left_center_top, text='保存', command=lambda: 1, width=5, height=1, state='disabled')
-        self.button_clear_message.grid(column=1, row=0, padx=3, ipadx=0)
-        self.button_save_message.grid(column=2, row=0, padx=3)
+        # Label(self.frame_left_center_top, text="").grid(row=0, column=0, ipadx=157, pady=0)
+        # self.button_clear_message = Button(self.frame_left_center_top, text='清屏', command=lambda : self.text_msglist.delete(0.0, END), width=5, height=1)#, state='disabled')
+        # self.button_save_message = Button(self.frame_left_center_top, text='保存', command=lambda: 1, width=5, height=1, state='disabled')
+        # self.button_clear_message.grid(column=1, row=0, padx=3, ipadx=0)
+        # self.button_save_message.grid(column=2, row=0, padx=3)
 
         # 单选框实现
         Label(self.frame_left_bottom, text="发送选择：", width=5, height=1).grid(row=0, column=0, ipadx=12, pady=2)
@@ -68,7 +68,7 @@ class Window():
         self.flb_pull_down_combobox.grid(column=4, row=0)  # 设置其在界面中出现的位置  column代表列   row 代表行
         self.flb_pull_down_combobox.current(0)  # 设置下拉列表默认显示的值，0为 numberChosen['values'] 的下标值
 
-        self.button_sendmsg = Button(self.frame_left_bottom, text='发送', command=self.show_message, width=5, state='disabled')
+        self.button_sendmsg = Button(self.frame_left_bottom, text='发送', command=self.btn_send_message, width=5, state='disabled')
         self.button_send_mode = Button(self.frame_left_bottom, text='多窗口', command=lambda :  1, width=5, state='disabled')
 
         # 把元素填充进去
@@ -79,7 +79,7 @@ class Window():
         self.button_send_mode.grid(column=6, row=0, padx=1, sticky=W)
 
         # 中间配置栏
-        self.frame_right_1 = LabelFrame(self.root, width=170, height=440, text=" ROBOT配置 ")
+        self.frame_right_1 = LabelFrame(self.root, width=170, height=460, text=" ROBOT配置 ")
         self.frame_right_1.grid(row=0, column=1, rowspan=4, padx=4, pady=5, ipadx=2, ipady=5)
         self.frame_right_1.grid_propagate(0)
 
@@ -95,9 +95,13 @@ class Window():
         self.robot_cho.grid(row=2, column=0, padx=4, pady=1, ipadx=2, ipady=3)
         self.robot_cho.grid_propagate(0)
 
-        self.com_cho = LabelFrame(self.frame_right_1, width=160, height=115, text=" 自定义回复 ")
+        self.com_cho = LabelFrame(self.frame_right_1, width=160, height=115, text=" 自定义消息 ")
         self.com_cho.grid(row=3, column=0, padx=4, pady=1, ipadx=2, ipady=3)
         self.com_cho.grid_propagate(0)
+
+        self.more_cho = LabelFrame(self.frame_right_1, width=160, height=50, text=" 其他 ")
+        self.more_cho.grid(row=4, column=0, padx=4, pady=1, ipadx=2, ipady=3)
+        self.more_cho.grid_propagate(0)
 
         # 复选框
         self.rg_chVar = IntVar()  # 用来获取复选框是否被勾选，通过chVarDis.get()来获取其的状态,其状态值为int类型 勾选为1  未勾选为0
@@ -171,8 +175,13 @@ class Window():
         Button(self.com_cho, text="选择", bd=1, command=lambda: self.select_path_file(self.path_file_1), width=3).grid(row=2, column=2, padx=1, pady=2 )
         Button(self.com_cho, text="读取", bd=1, command=lambda: self.select_path_file(self.path_file_1), width=3).grid(row=2, column=3, pady=2 )
 
+        self.button_clear_message = Button(self.more_cho, text='清屏', command=lambda: self.text_msglist.delete(0.0, END), width=8, height=1)#, state='disabled')
+        self.button_save_message = Button(self.more_cho, text='保存', command=lambda: 1, width=8, height=1, state='disabled')
+        self.button_clear_message.grid(column=0, row=0, padx=6)
+        self.button_save_message.grid(column=1, row=0, padx=6)
+
         # 右边个人信息栏
-        self.frame_right_2 = LabelFrame(self.root, width=170, height=440,text=" QQ信息 ")
+        self.frame_right_2 = LabelFrame(self.root, width=170, height=460,text=" QQ信息 ")
         self.frame_right_2.grid(row=0, column=2, rowspan=4, padx=4, pady=5, ipadx=2, ipady=5)
         self.name_label_text = StringVar()
         self.qq_label_text = StringVar()
@@ -194,7 +203,7 @@ class Window():
         bm = PhotoImage(file="./temp/QQ.png")
         self.img_label = Label(self.frame_right_2, image=bm, width=160, height=160)
         self.img_label.bm = bm
-        self.img_label.grid(row=0, column=0, columnspan=2, rowspan=2, ipadx=2, pady=2)
+        self.img_label.grid(row=0, column=0, columnspan=2, rowspan=2, ipadx=2, pady=30)
         Label(self.frame_right_2, textvariable=self.name_label_text, relief="solid", borderwidth=1, width=16, height=1, justify='left').grid(row=2, column=1, pady=2)
         Label(self.frame_right_2, textvariable=self.qq_label_text, relief="solid", borderwidth=1, width=16, height=1).grid(row=3, column=1, pady=2)
         Label(self.frame_right_2, textvariable=self.sex_label_text, relief="solid", borderwidth=1, width=16, height=1).grid(row=4, column=1, pady=2)
@@ -214,6 +223,7 @@ class Window():
     # 刷新好友列表
     def refresh_friends_list(self):
         global friends
+        self.rbt_btn_friend['state'] = 'normal'
         friends = self.smartqq._get_friends_info()
         self.rbt_pull_down_combobox_friend['values'] = tuple(["*请选择*","*回复所有*"] + list(friends.keys()))
         self.flb_radCall()
@@ -221,6 +231,7 @@ class Window():
     # 刷新群列表
     def refresh_groups_list(self):
         global groups
+        self.rbt_btn_group['state'] = 'normal'
         groups = self.smartqq._get_group_info()
         self.rbt_pull_down_combobox_group['values'] = tuple(["*请选择*","*回复所有*"] + list(groups.keys()))
         self.flb_radCall()
@@ -251,11 +262,16 @@ class Window():
     def group_information_handle(self, from_group_uin, group_sender_uin):
         if from_group_uin in group_information.keys():
             return group_information[from_group_uin]
-        group_info = self.smartqq.get_group_info(from_group_uin)
+        group_code = 0
+        for v in groups.values():
+            if v["gid"] == from_group_uin:
+                group_code = v["code"]
+        group_info = self.smartqq.get_group_info(group_code)
         if group_info != None:
             for info in group_info['minfo']:
                 if info['uin'] == group_sender_uin:
-                    return {"g_name":group_info["ginfo"]["name"],"s_name":info["nick"]}
+                    group_information[from_group_uin] = {"g_name":group_info["ginfo"]["name"],"s_name":info["nick"]}
+                    return group_information[from_group_uin]
             return {"g_name":group_info["ginfo"]["name"]}
         else:
             return None
@@ -264,8 +280,6 @@ class Window():
     # 单选按钮回调函数,就是当单选按钮被点击会执行该函数
     def flb_radCall(self):
         self.button_sendmsg['state'] = 'normal'  # 将发送按钮设置为 活动状态
-        self.rbt_btn_friend['state'] = 'normal'
-        self.rbt_btn_group['state'] = 'normal'
         radSel = self.flb_radVar.get()
         if radSel == 0:
             self.flb_pull_down_combobox['values'] = tuple(friends.keys())  # 设置下拉列表的值
@@ -275,48 +289,77 @@ class Window():
             print("切换为群列表.")
         self.flb_pull_down_combobox.set('*请选择*')
 
-    # 显示消息事件
-    def show_message(self, data=None):
+    # 显示消息
+    def show_message(self, strdt, msg):
         # 在聊天内容上方加一行 显示发送人及发送时间
         date = ':' + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + '\n'
-        msgcontent = '消息出错 '
-        if data != None:  # 接收消息显示处理
-            # 群消息处理 if
-            if data['poll_type'] == "group_message" and self.rg_chVar.get() == 1:
-                info = self.group_information_handle(data['from_uin'], data['send_uin'])
-                if info == None:
-                    return
-                if "s_name" in info.keys():
-                    msgcontent = '来自 ' + info['s_name'] + ' ( ' + info['g_name'] + ' (群))' + date
-                else:
-                    msgcontent = '发送 到 ' + info['g_name'] + '(群)' + date
-                self.text_msglist.insert(END, msgcontent, 'green')
-                self.text_msglist.insert(END, data['content'] + '\n')
-            # 好友消息处理 if
-            if data['poll_type'] == "message" and self.rf_chVar.get() == 1:
-                # 查找dict中好友昵称
-                for v in friends.values():
-                    if v['uin'] == data['from_uin']:
-                        msgcontent = '来自 ' + v['nick'] + '(好友)' + date
-                        break
-                self.text_msglist.insert(END, msgcontent, 'green')
-                self.text_msglist.insert(END, data['content'] + '\n')
-        else:  # 发送消息显示处理
-            msg = self.text_msgsend.get('0.0', END)
-            usr = self.flb_pull_down_combobox.get()
-            status = self.flb_radVar.get()
-            if msg != '\n' and usr != '*请选择*':
-                if status == 0:
-                    msgcontent = '发送 到 ' + str(usr) + '(好友)' + date
-                    self.smartqq._send_buddy_msg(friends[usr]['uin'], msg[:-1])
-                if status == 1:
-                    # msgcontent = '发送 到 '+ str(usr) + '(群)' + date
-                    self.smartqq._send_qun_msg(groups[usr]['gid'], msg[:-1])
-                    return
-                self.text_msglist.insert(END, msgcontent, 'green')
-                self.text_msglist.insert(END, msg)
-        self.text_msgsend.delete('0.0', END)
+        self.text_msglist.insert(END, strdt + date, 'green')
+        self.text_msglist.insert(END, msg + '\n')
         self.text_msglist.see(END)
+
+    # 图形界面输入发送消息处理
+    def btn_send_message(self):
+        msg = self.text_msgsend.get('0.0', END)
+        usr = self.flb_pull_down_combobox.get()
+        status = self.flb_radVar.get()
+        if msg != '\n' and usr != '*请选择*':
+            if status == 0:
+                msgcontent = '发送 到 ' + str(usr) + '(好友)'
+                self.smartqq._send_buddy_msg(friends[usr]['uin'], msg[:-1])
+                self.show_message(msgcontent,msg)
+            if status == 1:
+                self.smartqq._send_qun_msg(groups[usr]['gid'], msg[:-1])
+            self.text_msgsend.delete('0.0', END)
+
+    # 群消息处理
+    def group_msg_handle(self, from_uin, send_uin, message):
+        if self.rg_chVar.get() == 1:
+            info = self.group_information_handle(from_uin, send_uin)
+            if info == None:
+                return
+            if "s_name" in info.keys():
+                msgcontent = '来自 ' + info['s_name'] + ' ( ' + info['g_name'] + ' (群))'
+            else:
+                msgcontent = '发送 到 ' + info['g_name'] + '(群)'
+            self.show_message(msgcontent, message + '\n')
+
+    # 好友消息处理
+    def friend_msg_handle(self, from_uin, message):
+        if  self.rf_chVar.get() == 1:
+            # 查找dict中好友昵称
+            for v in friends.values():
+                if v['uin'] == from_uin:
+                    msgcontent = '来自 ' + v['nick'] + '(好友)'
+                    self.show_message(msgcontent, message + '\n')
+                    break
+
+    # 显示消息事件
+    # def show_message_1(self, data=None):
+    #     # 在聊天内容上方加一行 显示发送人及发送时间
+    #     date = ':' + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + '\n'
+    #     msgcontent = '消息出错 '
+    #     if data != None:  # 接收消息显示处理
+    #         # 群消息处理 if
+    #         if data['poll_type'] == "group_message" and self.rg_chVar.get() == 1:
+    #             info = self.group_information_handle(data['from_uin'], data['send_uin'])
+    #             if info == None:
+    #                 return
+    #             if "s_name" in info.keys():
+    #                 msgcontent = '来自 ' + info['s_name'] + ' ( ' + info['g_name'] + ' (群))' + date
+    #             else:
+    #                 msgcontent = '发送 到 ' + info['g_name'] + '(群)' + date
+    #             self.text_msglist.insert(END, msgcontent, 'green')
+    #             self.text_msglist.insert(END, data['content'] + '\n')
+    #         # 好友消息处理 if
+    #         if data['poll_type'] == "message" and self.rf_chVar.get() == 1:
+    #             # 查找dict中好友昵称
+    #             for v in friends.values():
+    #                 if v['uin'] == data['from_uin']:
+    #                     msgcontent = '来自 ' + v['nick'] + '(好友)' + date
+    #                     break
+    #             self.text_msglist.insert(END, msgcontent, 'green')
+    #             self.text_msglist.insert(END, data['content'] + '\n')
+    #     self.text_msglist.see(END)
 
     # 显示个人信息
     def show_self_info(self, img=None, data=None):

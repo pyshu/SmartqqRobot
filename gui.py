@@ -129,7 +129,7 @@ class Window():
         Label(self.robot_cho, text="好友:").grid(row=0, column=0, pady=2)
         # 下拉列表
         self.rbt_pull_down_number_friend = StringVar()
-        self.rbt_pull_down_combobox_friend = ttk.Combobox(self.robot_cho, width=10, height=3, textvariable=self.rbt_pull_down_number_friend, state='readonly')
+        self.rbt_pull_down_combobox_friend = ttk.Combobox(self.robot_cho, width=10, height=3, textvariable=self.rbt_pull_down_number_friend, state='disabled')
         self.rbt_pull_down_combobox_friend['values'] = tuple(["*请选择*","*回复所有*"] + list(friends.keys())) # 设置下拉列表的值
         self.rbt_pull_down_combobox_friend.grid(column=1, row=0)  # 设置其在界面中出现的位置  column代表列   row 代表行
         self.rbt_pull_down_combobox_friend.current(0)  # 设置下拉列表默认显示的值，0为 numberChosen['values'] 的下标值
@@ -139,7 +139,7 @@ class Window():
         Label(self.robot_cho, text=" 群: ").grid(row=1, column=0, pady=2)
         # 下拉列表
         self.rbt_pull_down_number_group = StringVar()
-        self.rbt_pull_down_combobox_group = ttk.Combobox(self.robot_cho, width=10, height=3,textvariable=self.rbt_pull_down_number_group,state='readonly')
+        self.rbt_pull_down_combobox_group = ttk.Combobox(self.robot_cho, width=10, height=3,textvariable=self.rbt_pull_down_number_group,state='disabled')
         self.rbt_pull_down_combobox_group['values'] = tuple(["*请选择*","*回复所有*"] + list(groups.keys()))   # 设置下拉列表的值
         self.rbt_pull_down_combobox_group.grid(column=1, row=1)  # 设置其在界面中出现的位置  column代表列   row 代表行
         self.rbt_pull_down_combobox_group.current(0)  # 设置下拉列表默认显示的值，0为 numberChosen['values'] 的下标值
@@ -243,16 +243,18 @@ class Window():
     # 刷新好友列表
     def refresh_friends_list(self):
         global friends
+        self.rbt_pull_down_combobox_friend["state"] = "normal"
         self.rbt_btn_friend['state'] = 'normal'
-        friends = self.smartqq._get_friends_info()
+        friends = self.smartqq.get_friends_info()
         self.rbt_pull_down_combobox_friend['values'] = tuple(["*请选择*","*回复所有*"] + list(friends.keys()))
         self.flb_radCall()
         print("刷新好友列表成功.")
     # 刷新群列表
     def refresh_groups_list(self):
         global groups
+        self.rbt_pull_down_combobox_group["state"] = "normal"
         self.rbt_btn_group['state'] = 'normal'
-        groups = self.smartqq._get_group_info()
+        groups = self.smartqq.get_group_list()
         self.rbt_pull_down_combobox_group['values'] = tuple(["*请选择*","*回复所有*"] + list(groups.keys()))
         self.flb_radCall()
         print("刷新群列表成功.")
@@ -262,7 +264,7 @@ class Window():
 
     # 刷新个人资料
     def refresh_self_info_list(self):
-        info = self.smartqq._get_self_info()
+        info = self.smartqq.get_self_info()
         print("刷新个人资料成功.")
         self.show_self_info(data=info)
 
@@ -329,10 +331,10 @@ class Window():
         if msg != '\n' and usr != '*请选择*':
             if status == 0:
                 msgcontent = '发送 到 ' + str(usr) + '(好友)'
-                self.smartqq._send_buddy_msg(friends[usr]['uin'], msg[:-1])
+                self.smartqq.send_buddy_msg(friends[usr]['uin'], msg[:-1])
                 self.show_message(msgcontent,msg)
             if status == 1:
-                self.smartqq._send_qun_msg(groups[usr]['gid'], msg[:-1])
+                self.smartqq.send_qun_msg(groups[usr]['gid'], msg[:-1])
             self.text_msgsend.delete('0.0', END)
 
     # 群消息处理

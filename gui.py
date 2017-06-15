@@ -91,11 +91,11 @@ class Window():
         self.ref_cho.grid(row=1, column=0, padx=4, pady=1, ipadx=2, ipady=3)
         self.ref_cho.grid_propagate(0)
 
-        self.robot_cho = LabelFrame(self.frame_right_1, width=160, height=110, text=" 监控 ")
+        self.robot_cho = LabelFrame(self.frame_right_1, width=160, height=110, text=" 监控(需刷新列表) ")
         self.robot_cho.grid(row=2, column=0, padx=4, pady=1, ipadx=2, ipady=3)
         self.robot_cho.grid_propagate(0)
 
-        self.com_cho = LabelFrame(self.frame_right_1, width=160, height=115, text=" 自定义消息 ")
+        self.com_cho = LabelFrame(self.frame_right_1, width=160, height=115, text=" 自定义消息导入 ")
         self.com_cho.grid(row=3, column=0, padx=4, pady=1, ipadx=2, ipady=3)
         self.com_cho.grid_propagate(0)
 
@@ -176,7 +176,7 @@ class Window():
         Button(self.com_cho, text="读取", bd=1, command=lambda: self.select_path_file(self.path_file_1), width=3).grid(row=2, column=3, pady=2 )
 
         self.button_clear_message = Button(self.more_cho, text='清屏', command=lambda: self.text_msglist.delete(0.0, END), width=8, height=1)#, state='disabled')
-        self.button_save_message = Button(self.more_cho, text='保存', command=lambda: 1, width=8, height=1, state='disabled')
+        self.button_save_message = Button(self.more_cho, text='保存', command=self.save_file, width=8, height=1)
         self.button_clear_message.grid(column=0, row=0, padx=6)
         self.button_save_message.grid(column=1, row=0, padx=6)
 
@@ -213,12 +213,32 @@ class Window():
         Label(self.frame_right_2, textvariable=self.face_label_text, relief="solid", borderwidth=1, width=16, height=1).grid(row=9, column=1, pady=2)
         self.frame_right_2.grid_propagate(0)
 
-    # 机器人回复列表
-    def rbt_friend_call(self):
-        auto_send_name["friend"] = self.rbt_pull_down_combobox_friend.get()
+    # 聊天消息保存
+    def save_file(self):
+        if self.text_msglist.get(0.0, 'end') != '\n':
+            with open('./temp/all-' + time.strftime("%Y%m%d%H%M%S", time.localtime()) +'.txt', 'w+') as fd:
+                fd.write(self.text_msglist.get(0.0, 'end'))
+                print("保存文件成功.")
 
+    # 回复好友按键回调
+    def rbt_friend_call(self):
+        if self.rbt_btn_friend["text"] == "OK":
+            auto_send_name["friend"] = self.rbt_pull_down_combobox_friend.get()
+            self.rbt_pull_down_combobox_friend["state"] = "disabled"
+            self.rbt_btn_friend["text"] = "取消"
+        else:
+            self.rbt_pull_down_combobox_friend["state"] = "normal"
+            self.rbt_btn_friend["text"] = "OK"
+
+    # 回复群按键回调
     def rbt_group_call(self):
-        auto_send_name["group"] = self.rbt_pull_down_combobox_group.get()
+        if self.rbt_btn_group["text"] == "OK":
+            auto_send_name["group"] = self.rbt_pull_down_combobox_group.get()
+            self.rbt_pull_down_combobox_group["state"] = "disabled"
+            self.rbt_btn_group["text"] = "取消"
+        else:
+            self.rbt_pull_down_combobox_group["state"] = "normal"
+            self.rbt_btn_group["text"] = "OK"
 
     # 刷新好友列表
     def refresh_friends_list(self):
@@ -259,19 +279,23 @@ class Window():
         size = '%dx%d+%d+%d' % (width, height, (screenwidth - width) / 2, (screenheight - height) / 2)
         self.root.geometry(size)
 
+    # 群资料获取和信息匹配
     def group_information_handle(self, from_group_uin, group_sender_uin):
+        print("group_information : %s" % group_information)
         if from_group_uin in group_information.keys():
-            return group_information[from_group_uin]
+            for v in group_information[from_group_uin]["s_name"]:
+                if v['uin'] == group_sender_uin:
+                    return {"g_name": group_information[from_group_uin]["g_name"], "s_name": v["nick"]}
         group_code = 0
         for v in groups.values():
             if v["gid"] == from_group_uin:
                 group_code = v["code"]
         group_info = self.smartqq.get_group_info(group_code)
         if group_info != None:
+            group_information[from_group_uin] = {"g_name": group_info["ginfo"]["name"], "s_name": group_info["minfo"]}
             for info in group_info['minfo']:
                 if info['uin'] == group_sender_uin:
-                    group_information[from_group_uin] = {"g_name":group_info["ginfo"]["name"],"s_name":info["nick"]}
-                    return group_information[from_group_uin]
+                    return {"g_name":group_info["ginfo"]["name"], "s_name":info["nick"]}
             return {"g_name":group_info["ginfo"]["name"]}
         else:
             return None
@@ -333,34 +357,6 @@ class Window():
                     self.show_message(msgcontent, message + '\n')
                     break
 
-    # 显示消息事件
-    # def show_message_1(self, data=None):
-    #     # 在聊天内容上方加一行 显示发送人及发送时间
-    #     date = ':' + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + '\n'
-    #     msgcontent = '消息出错 '
-    #     if data != None:  # 接收消息显示处理
-    #         # 群消息处理 if
-    #         if data['poll_type'] == "group_message" and self.rg_chVar.get() == 1:
-    #             info = self.group_information_handle(data['from_uin'], data['send_uin'])
-    #             if info == None:
-    #                 return
-    #             if "s_name" in info.keys():
-    #                 msgcontent = '来自 ' + info['s_name'] + ' ( ' + info['g_name'] + ' (群))' + date
-    #             else:
-    #                 msgcontent = '发送 到 ' + info['g_name'] + '(群)' + date
-    #             self.text_msglist.insert(END, msgcontent, 'green')
-    #             self.text_msglist.insert(END, data['content'] + '\n')
-    #         # 好友消息处理 if
-    #         if data['poll_type'] == "message" and self.rf_chVar.get() == 1:
-    #             # 查找dict中好友昵称
-    #             for v in friends.values():
-    #                 if v['uin'] == data['from_uin']:
-    #                     msgcontent = '来自 ' + v['nick'] + '(好友)' + date
-    #                     break
-    #             self.text_msglist.insert(END, msgcontent, 'green')
-    #             self.text_msglist.insert(END, data['content'] + '\n')
-    #     self.text_msglist.see(END)
-
     # 显示个人信息
     def show_self_info(self, img=None, data=None):
         # 文件夹检测
@@ -401,5 +397,3 @@ class Window():
 if __name__=="__main__":
     w = Window()
     w.run()
-
-

@@ -37,7 +37,7 @@ def robot():
             if get_msg != None:
                 if get_msg["poll_type"] == "group_message":
                     w.group_msg_handle(get_msg["from_uin"], get_msg["send_uin"], get_msg["content"])
-                    if get_msg["content"].find("@时光") >= 0 and get_msg["from_uin"] == gui.auto_send_name['group']:
+                    if get_msg["content"].find("@时光") >= 0 and gui.auto_send_name['group'] != None and get_msg["from_uin"] == groups[gui.auto_send_name['group']]['gid']:
                         if get_msg["content"].find("自动回复") >= 0:
                             msg = messge_text.messge_re[random.randint(0, 53)]
                         else:

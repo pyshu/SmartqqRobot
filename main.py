@@ -35,23 +35,23 @@ def robot():
             get_msg = qq.get_chat_msg()
             print("get_msg %s" % get_msg)
             if get_msg != None:
+                send_msg = "我不明白你的意思."
                 if get_msg["poll_type"] == "group_message":
                     w.group_msg_handle(get_msg["from_uin"], get_msg["send_uin"], get_msg["content"])
-                    if get_msg["content"].find("@"+qq.qqname) >= 0 and gui.auto_send_name['group'] != None and get_msg["from_uin"] == groups[gui.auto_send_name['group']]['gid']:
+                    if get_msg["content"].find("@"+qq.qqname) >= 0 and gui.auto_send_name['group'] != None and \
+                                    get_msg["from_uin"] == groups[gui.auto_send_name['group']]['gid']:
                         if get_msg["content"].find("自动回复") >= 0:
-                            msg = messge_text.messge_re[random.randint(0, 53)]
-                        else:
-                            msg = "我不明白你的意思."
-                        qq.send_qun_msg(groups[gui.auto_send_name['group']]['gid'], msg)
-                        print("机器人回复 : %s" % msg)
-                if get_msg["poll_type"] == "message" and gui.auto_send_name['friend'] != None and get_msg["from_uin"] == friends[gui.auto_send_name['friend']]['uin']:
+                            send_msg = messge_text.messge_re[random.randint(0, 53)]
+                        qq.send_qun_msg(groups[gui.auto_send_name['group']]['gid'], send_msg)
+                        print("机器人回复 : %s" % send_msg)
+                if get_msg["poll_type"] == "message" :
                     w.friend_msg_handle(get_msg["from_uin"], get_msg["content"])
-                    if get_msg["content"].find("自动回复") >= 0 and get_msg["from_uin"] == gui.auto_send_name['friend']:
-                        msg = messge_text.messge_re[random.randint(0, 53)]
-                    else:
-                        msg = "我不明白你的意思."
-                    qq.send_buddy_msg(friends[gui.auto_send_name['friend']]['uin'], msg)
-                    print("机器人回复 : %s" % msg)
+                    if gui.auto_send_name['friend'] != None and get_msg["from_uin"] == friends[gui.auto_send_name['friend']]['uin']:
+                        if get_msg["content"].find("自动回复") >= 0:
+                            send_msg = messge_text.messge_re[random.randint(0, 53)]
+                            qq.send_buddy_msg(friends[gui.auto_send_name['friend']]['uin'], send_msg)
+                        print("机器人回复 : %s" % send_msg)
+                        w.friend_msg_handle(get_msg["from_uin"], send_msg,True)
 
             time.sleep(1)
 

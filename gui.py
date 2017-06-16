@@ -139,7 +139,7 @@ class Window():
         Label(self.robot_cho, text=" 群: ").grid(row=1, column=0, pady=2)
         # 下拉列表
         self.rbt_pull_down_number_group = StringVar()
-        self.rbt_pull_down_combobox_group = ttk.Combobox(self.robot_cho, width=10, height=3,textvariable=self.rbt_pull_down_number_group,state='disabled')
+        self.rbt_pull_down_combobox_group = ttk.Combobox(self.robot_cho, width=10, height=3,textvariable=self.rbt_pull_down_number_group, state='disabled')
         self.rbt_pull_down_combobox_group['values'] = tuple(["*请选择*","*回复所有*"] + list(groups.keys()))   # 设置下拉列表的值
         self.rbt_pull_down_combobox_group.grid(column=1, row=1)  # 设置其在界面中出现的位置  column代表列   row 代表行
         self.rbt_pull_down_combobox_group.current(0)  # 设置下拉列表默认显示的值，0为 numberChosen['values'] 的下标值
@@ -227,6 +227,7 @@ class Window():
             self.rbt_pull_down_combobox_friend["state"] = "disabled"
             self.rbt_btn_friend["text"] = "取消"
         else:
+            auto_send_name["friend"] = None
             self.rbt_pull_down_combobox_friend["state"] = "normal"
             self.rbt_btn_friend["text"] = "OK"
 
@@ -237,6 +238,7 @@ class Window():
             self.rbt_pull_down_combobox_group["state"] = "disabled"
             self.rbt_btn_group["text"] = "取消"
         else:
+            auto_send_name["group"] = None
             self.rbt_pull_down_combobox_group["state"] = "normal"
             self.rbt_btn_group["text"] = "OK"
 
@@ -350,12 +352,15 @@ class Window():
             self.show_message(msgcontent, message + '\n')
 
     # 好友消息处理
-    def friend_msg_handle(self, from_uin, message):
+    def friend_msg_handle(self, from_uin, message, flag = None):
         if  self.rf_chVar.get() == 1:
             # 查找dict中好友昵称
             for v in friends.values():
                 if v['uin'] == from_uin:
-                    msgcontent = '来自 ' + v['nick'] + '(好友)'
+                    if flag == None:
+                        msgcontent = '来自 于 ' + v['nick'] + '(好友)'
+                    else:
+                        msgcontent = '发送 到 ' + v['nick'] + '(好友)'
                     self.show_message(msgcontent, message + '\n')
                     break
 

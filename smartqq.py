@@ -23,6 +23,7 @@ class SmartQQ():
         self.face = 0
         self.qqnum = 0
         self.qqname = ''
+        self.getmsgcount = 0
 
     def show_QRC(self,content):
         '''
@@ -69,7 +70,7 @@ class SmartQQ():
             # 登陆成功跳出循环
             if "二维码" not in content:
                 data = content.split(',')
-                print(data)
+                # print(data)
                 print("二维码认证成功.\n登录用户：%s\n" % (data[5])[:-3])
                 # 结束进程 p
                 if p.is_alive():
@@ -214,6 +215,11 @@ class SmartQQ():
         '''
         # 接收消息
         '''
+        if self.getmsgcount > 40:
+            self.get_online_buddies2()
+            self.getmsgcount = 0
+        else:
+            self.getmsgcount += 1
         get_msg_url = "https://d1.web2.qq.com/channel/poll2"
         self.headers["Origin"] = "https://d1.web2.qq.com"
         self.headers["Referer"] = "https://d1.web2.qq.com/cfproxy.html?v=20151105001&callback=1"
@@ -266,9 +272,9 @@ class SmartQQ():
         url = "http://d1.web2.qq.com/channel/get_online_buddies2?vfwebqq=" + str(self.vfwebqq) +\
               "&clientid=53999199&psessionid="+ str(self.psessionid) +\
               "&t=149429685" + str(random.randint(1000,10000))
-        # self.headers["Host"] = "d1.web2.qq.com"
-        # self.headers["Referer"] = "http://d1.web2.qq.com/proxy.html?v=20151105001&callback=1&id=2"
-        # self.ssession.headers.update(self.headers)
+        self.headers["Host"] = "d1.web2.qq.com"
+        self.headers["Referer"] = "http://d1.web2.qq.com/proxy.html?v=20151105001&callback=1&id=2"
+        self.ssession.headers.update(self.headers)
         try:
             j_data = json.loads(self.ssession.get(url=url).content.decode("utf-8"))
             print("QQ在线好友：%s" % j_data["result"])

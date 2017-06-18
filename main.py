@@ -18,11 +18,10 @@ def robot():
     qq.login() # 登录验证
     slf = qq.get_self_info() # 获取个人信息，主要是获取gid,发送信息会用到。
     friends = qq.get_friends_info() # 获取好友列表
+    groups = qq.get_group_list() # 获取群列表
     onli = qq.get_online_buddies2() # 获取在线好友
     rev = qq.get_recent_list2() # 获取最近列表
-    groups = qq.get_group_list() # 获取群列表
     img = qq.get_self_img()  # 获取个人头像
-    robot_group_uin = 0 # 监控的群名称。
 
     w.show_self_info(img=img, data=slf) # 显示个人信息
 

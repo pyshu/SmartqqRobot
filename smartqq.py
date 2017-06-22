@@ -272,9 +272,10 @@ class SmartQQ():
         url = "http://d1.web2.qq.com/channel/get_online_buddies2?vfwebqq=" + str(self.vfwebqq) +\
               "&clientid=53999199&psessionid="+ str(self.psessionid) +\
               "&t=149429685" + str(random.randint(1000,10000))
-        self.headers["Host"] = "d1.web2.qq.com"
-        self.headers["Referer"] = "http://d1.web2.qq.com/proxy.html?v=20151105001&callback=1&id=2"
-        self.ssession.headers.update(self.headers)
+        # headers = {"User-Agent":self.headers["User-Agent"]}
+        # headers["Host"] = "d1.web2.qq.com"
+        # headers["Referer"] = "http://d1.web2.qq.com/proxy.html?v=20151105001&callback=1&id=2"
+        # self.ssession.headers.update(headers)
         try:
             j_data = json.loads(self.ssession.get(url=url).content.decode("utf-8"))
             print("QQ在线好友：%s" % j_data["result"])
